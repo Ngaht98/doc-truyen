@@ -154,8 +154,14 @@
   .story-head h2 { margin: 2px 0 5px; font-size: 21px; line-height: 1.28; }
   .story-head .a { color: var(--muted); font-size: 15px; margin-bottom: 8px; }
   .story-head .meta { color: var(--muted); font-size: 13.5px; display: grid; gap: 2px; }
+  .src-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--accent); font-size: 13.5px; font-weight: 600; text-decoration: none; max-width: 100%; }
+  .src-link svg { width: 16px; height: 16px; }
+  .src-link span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
   .tag { font-size: 12.5px; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  button.tag { border: 0; font-family: inherit; display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; }
+  button.tag small { font-size: 11px; opacity: .7; font-variant-numeric: tabular-nums; }
+  button.tag:active { transform: scale(.96); }
   .desc { white-space: pre-wrap; font-size: 14.5px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; margin-bottom: 6px; max-height: 9.6em; overflow: hidden; position: relative; }
   .desc.open { max-height: none; }
   .desc:not(.open)::after { content: ""; position: absolute; inset: auto 0 0 0; height: 2.6em; background: linear-gradient(transparent, var(--card)); }
@@ -277,6 +283,7 @@
   <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></symbol>
   <symbol id="i-undo" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></symbol>
   <symbol id="i-filter" viewBox="0 0 24 24"><path d="M3 5h18l-7 8.5V19l-4 2v-7.5z"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
   <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7.5 7.5 4.5-4.5 4.5 4.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></symbol>
 </svg>
 <div id="app"></div>
@@ -285,7 +292,7 @@
 'use strict';
 /* Đọc truyện: web app chỉ đọc. Truyện nằm trong máy (IndexedDB), nhập từ file .wmkho xuất ở app TienIchWM (📱 Xuất kho).
    Nhập kho mới = thay toàn bộ kho cũ (làm trong một giao dịch: lỗi giữa chừng thì kho cũ còn nguyên), chỗ đang đọc vẫn giữ. */
-const APP_VERSION = '2.2 · 25/11/2026';
+const APP_VERSION = '2.4 · 25/11/2026';
 const FORMAT = 'TienIchWM-kho';
 const $app = document.getElementById('app'), $file = document.getElementById('file');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -502,6 +509,8 @@ function listView() {
   }
   const all = tagCounts();
   S.tags = S.tags.filter(t => all.some(x => x.name === t));
+  // nhớ bộ lọc thể loại trong lịch sử: mở truyện rồi quay lại vẫn đúng danh sách đang lọc
+  try { if (history.state?.view === 'list' || !history.state) history.replaceState({ ...(history.state || {}), view: 'list', tags: [...S.tags] }, ''); } catch {}
   const rows = shown();
   if (prefs.sort === 'recent') rows.sort((a, b) => (S.pos.get(b.id)?.at || 0) - (S.pos.get(a.id)?.at || 0) || a.order - b.order);
   else if (prefs.sort === 'az') rows.sort((a, b) => a.title.localeCompare(b.title, 'vi'));
@@ -567,10 +576,15 @@ function refreshTagSheet() {
 function storyView() {
   const s = story(S.sid), p = progress(s), words = s.chapters.reduce((a, c) => a + c.words, 0);
   const cur = p ? s.chapters[p.i].id : null;
+  // Link gốc (AO3…): chỉ nhận http(s), mở bằng trình duyệt (cần mạng)
+  let link = null;
+  try { const u = new URL(s.link); if (u.protocol === 'https:' || u.protocol === 'http:') link = u; } catch {}
+  const linkName = link ? (/archiveofourown\.org$/i.test(link.hostname) ? 'AO3' : link.hostname.replace(/^www\./, '')) : '';
   $app.innerHTML = `<div class="wrap"><div class="top"><button class="ib" data-act="back" aria-label="Quay lại">${icon('back')}</button><span class="title"></span><button class="ib" data-act="settings" aria-label="Cài đặt">${icon('gear')}</button></div>
     <div class="story-head">${coverHtml(s)}<div style="min-width:0"><h2>${esc(s.title)}</h2>${s.author ? `<div class="a">${esc(s.author)}</div>` : ''}
-      <div class="meta"><span>${num(s.chapters.length)} chương · ${num(words)} từ</span>${p ? `<span>Đã đọc ${pct(p.ratio)}</span>` : ''}</div></div></div>
-    ${s.categories.length ? `<div class="tags">${s.categories.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
+      <div class="meta"><span>${num(s.chapters.length)} chương · ${num(words)} từ</span>${p ? `<span>Đã đọc ${pct(p.ratio)}</span>` : ''}</div>
+      ${link ? `<a class="src-link" href="${esc(link.href)}" target="_blank" rel="noopener noreferrer" data-src-link>${icon('link')}<span>Link gốc · ${esc(linkName)}</span></a>` : ''}</div></div>
+    ${s.categories.length ? `<div class="tags">${s.categories.map(t => { const n = S.stories.filter(x => x.categories.includes(t)).length; return `<button class="tag" data-act="tag-go" data-tag="${esc(t)}" aria-label="Xem các truyện thể loại ${esc(t)}">${esc(t)}${n > 1 ? `<small>${n}</small>` : ''}</button>`; }).join('')}</div>` : ''}
     ${s.description ? `<div class="desc" data-desc>${esc(s.description)}</div><button class="more" data-act="more">Xem thêm</button>` : ''}
     ${s.chapters.length ? `<button class="btn primary go" data-act="read" data-cid="${esc(cur || s.chapters[0].id)}">${icon('book')}${p ? `Đọc tiếp · Chương ${p.i + 1}` : 'Bắt đầu đọc'}</button>` : ''}
     <div class="sec"><span>Mục lục</span><span>${num(s.chapters.length)} chương</span></div>
@@ -790,6 +804,7 @@ document.addEventListener('click', e => {
   else if (a === 'layout') { prefs.layout = prefs.layout === 'grid' ? 'list' : 'grid'; savePrefs(); listView(); }
   else if (a === 'tag') { const k = t.dataset.tag; S.tags = S.tags.includes(k) ? S.tags.filter(x => x !== k) : [...S.tags, k]; listView(); refreshTagSheet(); }
   else if (a === 'tag-clear') { S.tags = []; listView(); refreshTagSheet(); }
+  else if (a === 'tag-go') { S.tags = [t.dataset.tag]; S.q = ''; S.listY = 0; go({ view: 'list' }); scrollTo(0, 0); } // bấm thể loại trong trang truyện: danh sách truyện cùng thể loại, nút quay lại về truyện
   else if (a === 'tags') { S.tagq = ''; tagSheet(); }
   else if (a === 'tag-letter') document.querySelector(`.sheet [data-group="${t.dataset.l}"]`)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
   else if (a === 'story') { S.listY = scrollY; go({ view: 'story', sid: t.dataset.id }); }
@@ -831,6 +846,7 @@ addEventListener('popstate', e => {
   const st = e.state || { view: 'list' };
   const was = S.view;
   S.view = st.view; S.sid = st.sid; S.cid = st.cid;
+  if (st.view === 'list') S.tags = Array.isArray(st.tags) ? st.tags : [];
   closeSheet();
   render();
   if (S.view === 'list' && was !== 'list' && S.listY != null) scrollTo(0, S.listY);
