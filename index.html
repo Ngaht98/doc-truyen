@@ -285,7 +285,7 @@
 'use strict';
 /* Đọc truyện: web app chỉ đọc. Truyện nằm trong máy (IndexedDB), nhập từ file .wmkho xuất ở app TienIchWM (📱 Xuất kho).
    Nhập kho mới = thay toàn bộ kho cũ (làm trong một giao dịch: lỗi giữa chừng thì kho cũ còn nguyên), chỗ đang đọc vẫn giữ. */
-const APP_VERSION = '2.1 · 25/11/2026';
+const APP_VERSION = '2.2 · 25/11/2026';
 const FORMAT = 'TienIchWM-kho';
 const $app = document.getElementById('app'), $file = document.getElementById('file');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);

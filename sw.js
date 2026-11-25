@@ -1,6 +1,6 @@
 // Lưu giao diện web app vào máy để mở được khi không có mạng. Truyện không nằm ở đây (nằm trong IndexedDB).
 // Đổi VERSION mỗi lần sửa giao diện: điện thoại tải bản mới khi có mạng, bản cũ tự xoá, app báo "Đã có bản mới · Tải lại".
-const VERSION = 'doc-truyen-v3';
+const VERSION = 'doc-truyen-v4';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
