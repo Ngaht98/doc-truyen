@@ -104,6 +104,13 @@
   .tag-foot .sum b { color: var(--text); }
   .tag-foot .row2 { display: flex; gap: 8px; }
   .tag-foot .row2 .btn { flex: 1; min-height: 44px; }
+  .imp-file { font-size: 13px; color: var(--muted); font-weight: 500; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .imp-sum { font-size: 14px; color: var(--muted); margin: -4px 2px 4px; }
+  .imp-sum b { color: var(--text); }
+  .imp-h { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; margin: 16px 4px 6px; font-size: 14px; }
+  .imp-h small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 1px; }
+  .imp-h .link { border: 0; background: none; color: var(--accent); font-weight: 600; font-size: 14px; padding: 4px 0; flex: none; }
+  .imp-extra { gap: 3px; font-size: 14px; color: var(--muted); max-height: 160px; overflow: auto; }
 
   .hint { border: 1px solid var(--line); background: var(--card); border-radius: 16px; padding: 12px 12px 12px 14px; margin-bottom: 14px; font-size: 14px; color: var(--muted); display: flex; gap: 10px; align-items: flex-start; }
   .hint b { color: var(--text); }
@@ -291,8 +298,8 @@
 <script>
 'use strict';
 /* Đọc truyện: web app chỉ đọc. Truyện nằm trong máy (IndexedDB), nhập từ file .wmkho xuất ở app TienIchWM (📱 Xuất kho).
-   Nhập kho mới = thay toàn bộ kho cũ (làm trong một giao dịch: lỗi giữa chừng thì kho cũ còn nguyên), chỗ đang đọc vẫn giữ. */
-const APP_VERSION = '2.4 · 25/11/2026';
+   Nhập kho: so với tủ truyện đang có, hiện truyện mới / có bản mới hơn / trùng y hệt để chọn rồi mới lưu (một giao dịch: lỗi giữa chừng thì không đổi gì), chỗ đang đọc vẫn giữ. */
+const APP_VERSION = '2.5 · 25/11/2026';
 const FORMAT = 'TienIchWM-kho';
 const $app = document.getElementById('app'), $file = document.getElementById('file');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -392,49 +399,127 @@ async function readKho(file) {
   if (kho.version > 1) throw new Error('File kho làm từ bản app mới hơn, tải lại trang này (khi có mạng) rồi nhập lại nhé');
   return kho;
 }
+/* So khớp truyện trong file với truyện đã có: cùng mã, cùng link (AO3 theo số work) hoặc cùng tên + tác giả */
+const linkKey = l => {
+  l = String(l || '').trim().toLowerCase(); if (!l) return '';
+  const m = l.match(/archiveofourown\.org\/(?:collections\/[^/]+\/)?works\/(\d+)/);
+  return m ? 'ao3:' + m[1] : l.replace(/^https?:\/\/(www\.)?/, '').replace(/[?#].*$/, '').replace(/\/+$/, '');
+};
+const nameKey = s => plain(s.title).replace(/\s+/g, ' ').trim() + '\n' + plain(s.author).replace(/\s+/g, ' ').trim();
+const wordsOf = chs => (chs || []).reduce((a, c) => a + (Number(c?.words) || 0), 0);
+let pending = null; // { kho, file, rows, extra, drop }
+function compareKho(kho) {
+  const used = new Set();
+  const byId = new Map(S.stories.map(s => [s.id, s]));
+  const rows = [];
+  kho.stories.forEach((s, i) => {
+    if (!s || !s.id) return;
+    const lk = linkKey(s.link), nk = nameKey(s);
+    let old = byId.get(String(s.id));
+    if (old && used.has(old.id)) old = null;
+    old ??= S.stories.find(o => !used.has(o.id) && ((lk && linkKey(o.link) === lk) || nameKey(o) === nk)) || null;
+    if (old) used.add(old.id);
+    const chs = (s.chapters || []).filter(c => c && c.id);
+    let kind = 'new', note = '';
+    if (old) {
+      const add = chs.length - old.chapters.length;
+      const same = add === 0 && wordsOf(chs) === wordsOf(old.chapters) && String(s.updated || '') === String(old.updated || '')
+        && String(s.title || '') === old.title && String(s.author || '') === old.author && String(s.description || '') === old.description
+        && (s.categories || []).join('\n') === old.categories.join('\n') && chs.every((c, k) => String(c.title || '') === old.chapters[k]?.title);
+      if (same) kind = 'same';
+      else { kind = 'upd'; note = add > 0 ? `+${num(add)} chương mới` : add < 0 ? `ít hơn bản trên điện thoại ${num(-add)} chương` : 'nội dung / thông tin có thay đổi'; }
+    }
+    rows.push({ i, s, chs, old, kind, note, on: kind !== 'same' });
+  });
+  return { rows, extra: S.stories.filter(s => !used.has(s.id)) };
+}
 async function importKho(file) {
   showBusy('Đang đọc file…');
+  let kho;
+  try { kho = await readKho(file); }
+  catch (e) { hideBusy(); toast((e?.message || 'Không nhập được file') + ' · Kho cũ vẫn giữ nguyên', true); return; }
+  hideBusy();
+  const { rows, extra } = compareKho(kho);
+  pending = { kho, file, rows, extra, drop: false };
+  if (!S.stories.length) return applyImport(); // tủ đang trống: nhập luôn, không cần hỏi
+  importSheet();
+}
+const KINDS = [['new', 'Truyện mới', 'Chưa có trên điện thoại'], ['upd', 'Có bản mới hơn', 'Đã có, bật thì thay bằng bản trong file (chỗ đang đọc vẫn giữ)'], ['same', 'Trùng y hệt', 'Giống hệt bản trên điện thoại, mặc định bỏ qua']];
+function importSheet() {
+  const p = pending, c = k => p.rows.filter(r => r.kind === k).length;
+  openSheet(`<h3>Nhập kho<span class="imp-file">${esc(p.file.name)}</span></h3>
+    <div class="imp-sum">File có <b>${num(p.rows.length)}</b> truyện: <b>${num(c('new'))}</b> mới · <b>${num(c('upd'))}</b> có bản mới hơn · <b>${num(c('same'))}</b> trùng y hệt</div>
+    ${KINDS.map(([k, l, sub]) => {
+      const list = p.rows.filter(r => r.kind === k);
+      if (!list.length) return '';
+      return `<div class="imp-h"><span><b>${l} (${num(list.length)})</b><small>${sub}</small></span>${list.length > 1 ? `<button class="link" data-act="pick-all" data-k="${k}">${list.every(r => r.on) ? 'Bỏ hết' : 'Chọn hết'}</button>` : ''}</div>
+        <div class="group">${list.map(r => `<label class="item"><span class="lbl">${esc(r.s.title || 'Truyện')}<small>${[r.s.author, num(r.chs.length) + ' chương', r.note].filter(Boolean).map(esc).join(' · ')}</small></span><span class="switch"><input type="checkbox" data-pick="${r.i}"${r.on ? ' checked' : ''}><i></i></span></label>`).join('')}</div>`;
+    }).join('')}
+    ${p.extra.length ? `<div class="imp-h"><span><b>Chỉ có trên điện thoại (${num(p.extra.length)})</b><small>Không có trong file này, mặc định vẫn giữ</small></span></div>
+      <div class="group"><div class="item stack imp-extra">${p.extra.slice(0, 30).map(s => `<span>${esc(s.title)}</span>`).join('')}${p.extra.length > 30 ? `<span>… và ${num(p.extra.length - 30)} truyện khác</span>` : ''}</div>
+      <label class="item"><span class="lbl">Xoá các truyện này<small>Bật nếu muốn điện thoại giống hệt kho trong file</small></span><span class="switch"><input type="checkbox" data-drop${p.drop ? ' checked' : ''}><i></i></span></label></div>` : ''}
+    <div class="tag-foot"><div class="sum" data-imp-sum>${importSum()}</div>
+      <div class="row2"><button class="btn" data-act="imp-cancel">Huỷ</button><button class="btn primary" data-act="imp-go">Nhập</button></div></div>`);
+}
+function importSum() {
+  const p = pending, on = p.rows.filter(r => r.on);
+  const add = on.filter(r => !r.old).length, upd = on.length - add, del = p.drop ? p.extra.length : 0;
+  const parts = [add && `thêm <b>${num(add)}</b> truyện`, upd && `thay <b>${num(upd)}</b> truyện bằng bản trong file`, del && `xoá <b>${num(del)}</b> truyện`].filter(Boolean);
+  return parts.length ? 'Sẽ ' + parts.join(', ') : 'Chưa chọn truyện nào, nhập sẽ không thay đổi gì';
+}
+function refreshImportSheet() {
+  const x = document.querySelector('[data-imp-sum]'); if (x) x.innerHTML = importSum();
+  document.querySelectorAll('.sheet [data-act=pick-all]').forEach(b => { b.textContent = pending.rows.filter(r => r.kind === b.dataset.k).every(r => r.on) ? 'Bỏ hết' : 'Chọn hết'; });
+}
+async function applyImport() {
+  const { kho, file, rows, extra, drop } = pending;
+  pending = null;
+  const on = rows.filter(r => r.on), del = drop ? extra : [];
+  closeSheet();
+  if (!on.length && !del.length) { toast('Không có gì thay đổi, tủ truyện giữ nguyên'); return; }
+  showBusy('Đang lưu truyện vào máy…');
   try {
-    const kho = await readKho(file);
-    showBusy('Đang lưu truyện vào máy…');
     try { await navigator.storage?.persist?.(); } catch {} // xin giữ dữ liệu lâu dài (iOS 17+), không được thì thôi
-    const pos = await all('pos');
+    const pos = new Map((await all('pos')).map(p => [p.id, p]));
     const d = await db();
     const tx = d.transaction(['stories', 'texts', 'images', 'pos', 'meta'], 'readwrite');
     const os = n => tx.objectStore(n);
-    // Xoá kho cũ rồi ghi kho mới trong cùng một giao dịch: lỗi giữa chừng thì không gì thay đổi
-    os('stories').clear(); os('texts').clear(); os('images').clear();
-    let chapters = 0;
-    const keep = new Map();
-    kho.stories.forEach((s, i) => {
-      if (!s || !s.id) return;
-      const chs = (s.chapters || []).filter(c => c && c.id).map(c => ({ id: String(c.id), title: String(c.title || ''), words: Number(c.words) || 0 }));
-      const meta = { id: String(s.id), order: i, title: String(s.title || 'Truyện'), author: String(s.author || ''), link: String(s.link || ''),
+    // Cả lần nhập nằm trong một giao dịch: lỗi giữa chừng thì tủ truyện không đổi gì
+    const dropData = id => { const r = IDBKeyRange.bound(id + '\n', id + '\n￿'); os('texts').delete(r); os('images').delete(r); };
+    const removeStory = id => { os('stories').delete(id); dropData(id); };
+    const final = []; // thứ tự mới: theo file, truyện chỉ có trên điện thoại xếp sau
+    let added = 0, updated = 0;
+    for (const r of rows) {
+      if (!r.on) { if (r.old) final.push(r.old); continue; }
+      const s = r.s, id = String(s.id);
+      const meta = { id, title: String(s.title || 'Truyện'), author: String(s.author || ''), link: String(s.link || ''),
         categories: Array.isArray(s.categories) ? s.categories.map(String) : [], description: String(s.description || ''), updated: s.updated || '',
-        cover: typeof s.cover === 'string' && s.cover.startsWith('data:image/') ? s.cover : null, chapters: chs, read: s.read || null };
-      os('stories').put(meta);
-      for (const c of s.chapters || []) if (c && c.id) os('texts').put(String(c.text || ''), key2(meta.id, String(c.id)));
-      for (const [name, url] of Object.entries(s.images || {})) if (typeof url === 'string' && url.startsWith('data:image/')) os('images').put(url, key2(meta.id, name));
-      chapters += chs.length;
-      keep.set(meta.id, meta);
-    });
-    // Chỗ đang đọc: giữ của truyện / chương còn trong kho, bỏ phần thừa; truyện chưa đọc trên điện thoại thì lấy chỗ đọc trên máy tính
-    for (const p of pos) {
-      const s = keep.get(p.id);
-      if (!s || !s.chapters.some(c => c.id === p.chapter)) os('pos').delete(p.id);
+        cover: typeof s.cover === 'string' && s.cover.startsWith('data:image/') ? s.cover : null,
+        chapters: r.chs.map(c => ({ id: String(c.id), title: String(c.title || ''), words: Number(c.words) || 0 })), read: s.read || null };
+      if (r.old) { removeStory(r.old.id); updated++; } else { dropData(id); added++; }
+      for (const c of r.chs) os('texts').put(String(c.text || ''), key2(id, String(c.id)));
+      for (const [name, url] of Object.entries(s.images || {})) if (typeof url === 'string' && url.startsWith('data:image/')) os('images').put(url, key2(id, name));
+      // Chỗ đang đọc: giữ chỗ trên điện thoại nếu chương còn; chưa đọc trên điện thoại thì lấy chỗ đọc trên máy tính
+      const has = cid => meta.chapters.some(c => c.id === cid);
+      const old = pos.get(r.old?.id ?? id);
+      if (r.old && r.old.id !== id) os('pos').delete(r.old.id);
+      if (old && has(old.chapter)) os('pos').put({ ...old, id });
+      else if (meta.read?.chapter && has(String(meta.read.chapter))) os('pos').put({ id, chapter: String(meta.read.chapter), offset: Math.min(1, Math.max(0, Number(meta.read.offset) || 0)), at: 0 });
+      else os('pos').delete(id);
+      final.push(meta);
     }
-    for (const s of keep.values()) {
-      if (s.read?.chapter && s.chapters.some(c => c.id === s.read.chapter) && !pos.some(p => p.id === s.id && s.chapters.some(c => c.id === p.chapter)))
-        os('pos').put({ id: s.id, chapter: String(s.read.chapter), offset: Math.min(1, Math.max(0, Number(s.read.offset) || 0)), at: 0 });
-    }
-    os('meta').put({ imported: new Date().toISOString(), exported: kho.exported || '', file: file.name, stories: keep.size, chapters }, 'info');
+    for (const s of extra) if (!del.includes(s)) final.push(s);
+    for (const s of del) { removeStory(s.id); os('pos').delete(s.id); }
+    final.forEach((s, i) => os('stories').put({ ...s, order: i }));
+    os('meta').put({ imported: new Date().toISOString(), exported: kho.exported || '', file: file.name, stories: final.length, chapters: final.reduce((a, s) => a + s.chapters.length, 0) }, 'info');
     await done(tx);
     await load();
     hideBusy();
     S.view = 'list'; S.sid = S.cid = null; S.tags = []; S.tagq = '';
     history.replaceState({ view: 'list' }, '', location.pathname + location.search);
     render();
-    toast(`✓ Đã nhập ${num(keep.size)} truyện, ${num(chapters)} chương. File trong app Tệp xoá đi được rồi nhé`);
+    const msg = [added && `thêm ${num(added)} truyện`, updated && `cập nhật ${num(updated)} truyện`, del.length && `xoá ${num(del.length)} truyện`].filter(Boolean).join(', ');
+    toast(`✓ Đã ${msg}. File trong app Tệp xoá đi được rồi nhé`);
   } catch (e) {
     hideBusy();
     toast(e?.name === 'QuotaExceededError' ? 'Điện thoại hết chỗ lưu, kho cũ vẫn giữ nguyên. Dọn bớt bộ nhớ rồi thử lại nhé' : (e?.message || 'Không nhập được file') + ' · Kho cũ vẫn giữ nguyên', true);
@@ -739,7 +824,7 @@ async function settingsView() {
       <div class="stat"><div><b>${num(S.stories.length)}</b><small>truyện</small></div><div><b>${num(chapters)}</b><small>chương</small></div><div><b data-used>…</b><small>đang dùng</small></div></div>
       ${m ? `<div class="item"><span class="lbl">Kho hiện tại<small>${esc(m.file)} · nhập lúc ${new Date(m.imported).toLocaleString('vi-VN')}</small></span></div>` : ''}
       <div class="item"><span class="lbl">Lưu trữ lâu dài<small data-persist>Đang kiểm tra…</small></span></div>
-      <button class="item act" data-act="import"><span class="ico">${icon('import')}</span><span class="lbl">Nhập kho mới<small style="color:var(--muted);font-weight:400">Thay toàn bộ kho cũ, vẫn giữ chỗ đang đọc</small></span></button>
+      <button class="item act" data-act="import"><span class="ico">${icon('import')}</span><span class="lbl">Nhập kho mới<small style="color:var(--muted);font-weight:400">Xem truyện mới / trùng rồi chọn, vẫn giữ chỗ đang đọc</small></span></button>
       ${S.pos.size ? `<button class="item act" data-act="reset-pos"><span class="ico">${icon('undo')}</span><span class="lbl">Xoá chỗ đang đọc</span></button>` : ''}
       ${S.stories.length ? `<button class="item act danger" data-act="wipe"><span class="ico">${icon('trash')}</span><span class="lbl">Xoá toàn bộ truyện</span></button>` : ''}
     </div>
@@ -796,7 +881,10 @@ document.addEventListener('click', e => {
   if (a === 'import') { closeSheet(); pickFile(); }
   else if (a === 'settings') { closeSheet(); if (S.view === 'read') savePos(true); go({ view: 'settings' }); }
   else if (a === 'aa') aaSheet();
-  else if (a === 'close') closeSheet();
+  else if (a === 'close') { closeSheet(); pending = null; }
+  else if (a === 'imp-go') { if (pending) applyImport(); }
+  else if (a === 'imp-cancel') { closeSheet(); pending = null; toast('Đã huỷ, tủ truyện giữ nguyên'); }
+  else if (a === 'pick-all') { const l = pending.rows.filter(r => r.kind === t.dataset.k), v = !l.every(r => r.on); l.forEach(r => { r.on = v; const x = document.querySelector('.sheet [data-pick="' + r.i + '"]'); if (x) x.checked = v; }); refreshImportSheet(); }
   else if (a === 'wipe') wipe();
   else if (a === 'reset-pos') resetPos();
   else if (a === 'reset-prefs') { if (confirm('Đưa mọi cài đặt (chủ đề, phông chữ, cỡ chữ…) về mặc định?')) { prefs = { ...DEFAULTS }; savePrefs(); refreshSettingsUi(); toast('Đã khôi phục cài đặt mặc định'); } }
@@ -827,6 +915,8 @@ document.addEventListener('input', e => {
 document.addEventListener('change', e => {
   const t = e.target;
   if (t.matches('input[type=checkbox][data-set]')) setPref(t.dataset.set, t.checked);
+  if (t.matches('[data-pick]') && pending) { const r = pending.rows.find(r => r.i === Number(t.dataset.pick)); if (r) r.on = t.checked; refreshImportSheet(); }
+  if (t.matches('[data-drop]') && pending) { pending.drop = t.checked; refreshImportSheet(); }
   if (t.matches('input[type=range][data-set]') && S.view === 'read') { const r = ratio(); requestAnimationFrame(() => scrollTo(0, r * maxY())); }
 });
 
