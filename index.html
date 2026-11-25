@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#f6f1e7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16151a" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Đọc truyện">
+<meta name="format-detection" content="telephone=no">
+<title>Đọc truyện</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+  /* Chủ đề: sáng / giấy / tối; "auto" theo điện thoại */
+  :root {
+    --bg: #f6f1e7; --card: #fffdf8; --text: #2b2620; --muted: #8a8073; --line: #e6ddcd; --field: #efe7d8;
+    --accent: #b5543c; --accent-soft: #f3dfd6; --ok: #3d7a4f; --err: #b3392f;
+    --read-bg: #fbf6ec; --read-text: #2e2922;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* phông có chân đủ dấu tiếng Việt (Georgia, Iowan thiếu ầ, ắ… nên không dùng) */
+    --serif: ui-serif, "New York", "Noto Serif", "Times New Roman", serif;
+    --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px);
+    color-scheme: light;
+  }
+  :root[data-theme="light"] { --bg: #f4f5f7; --card: #fff; --text: #1d1f23; --muted: #7b808a; --line: #e2e4e9; --field: #eceef2; --read-bg: #fff; --read-text: #1f2125; --accent-soft: #f6e1da; }
+  :root[data-theme="dark"] { --bg: #16151a; --card: #201f25; --text: #ecebef; --muted: #9a98a3; --line: #302e37; --field: #2a2930; --accent: #e3876d; --accent-soft: #3a2a26; --read-bg: #18171c; --read-text: #d9d7de; --ok: #6cbf83; --err: #ef7d73; color-scheme: dark; }
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] { --bg: #16151a; --card: #201f25; --text: #ecebef; --muted: #9a98a3; --line: #302e37; --field: #2a2930; --accent: #e3876d; --accent-soft: #3a2a26; --read-bg: #18171c; --read-text: #d9d7de; --ok: #6cbf83; --err: #ef7d73; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--text); font: 16px/1.5 var(--font); -webkit-text-size-adjust: 100%; min-height: 100vh; }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  [hidden] { display: none !important; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: calc(var(--safe-t) + 12px) 16px calc(var(--safe-b) + 28px); }
+
+  /* Thanh trên */
+  .top { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .top h1 { font-size: 26px; line-height: 1.15; margin: 0; flex: 1; letter-spacing: -.01em; }
+  .top h1 small { display: block; font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: 0; margin-top: 2px; }
+  .icon-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); display: grid; place-items: center; font-size: 18px; flex: none; }
+  .icon-btn:active { transform: scale(.96); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); font-weight: 600; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.danger { color: var(--err); }
+  .btn:active { transform: scale(.98); }
+  .btn:disabled { opacity: .5; }
+
+  .search { width: 100%; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); padding: 0 14px; margin-bottom: 12px; font-size: 16px; }
+  .search:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+  /* Gợi ý thêm vào màn hình chính */
+  .hint { border: 1px solid var(--line); background: var(--card); border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; font-size: 14px; color: var(--muted); display: flex; gap: 10px; align-items: flex-start; }
+  .hint b { color: var(--text); }
+  .hint button { margin-left: auto; border: 0; background: none; color: var(--muted); font-size: 18px; padding: 0 4px; }
+
+  /* Danh sách truyện */
+  .list { display: grid; gap: 10px; }
+  .card { display: flex; gap: 12px; align-items: stretch; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--card); border-radius: 16px; padding: 10px; }
+  .card:active { transform: scale(.99); }
+  .cover { width: 62px; aspect-ratio: 2 / 3; border-radius: 9px; flex: none; overflow: hidden; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 24px; background: linear-gradient(150deg, var(--c1, #c0705a), var(--c2, #7a3b5c)); }
+  .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card .info { min-width: 0; flex: 1; display: grid; align-content: center; gap: 3px; }
+  .card .t { font-weight: 650; font-size: 16px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card .a { color: var(--muted); font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card .p { font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .bar { height: 4px; border-radius: 4px; background: var(--field); flex: 1; max-width: 120px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+  .reading { color: var(--accent); font-weight: 600; }
+
+  .empty { text-align: center; padding: 40px 12px; }
+  .empty .big { font-size: 54px; line-height: 1; margin-bottom: 10px; }
+  .empty h2 { margin: 0 0 6px; font-size: 21px; }
+  .empty p { color: var(--muted); margin: 0 auto 18px; max-width: 420px; font-size: 15px; }
+  .steps { text-align: left; max-width: 420px; margin: 18px auto 0; padding: 12px 14px 12px 34px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: var(--muted); font-size: 14px; }
+  .steps li { margin: 4px 0; }
+  .steps b { color: var(--text); }
+
+  /* Trang truyện */
+  .story-head { display: flex; gap: 14px; margin-bottom: 14px; }
+  .story-head .cover { width: 104px; font-size: 38px; border-radius: 12px; box-shadow: 0 6px 18px rgb(0 0 0 / .12); }
+  .story-head h2 { margin: 0 0 4px; font-size: 21px; line-height: 1.25; }
+  .story-head .a { color: var(--muted); font-size: 14.5px; margin-bottom: 6px; }
+  .story-head .meta { color: var(--muted); font-size: 13px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+  .tag { font-size: 12.5px; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .desc { white-space: pre-wrap; font-size: 14.5px; color: var(--text); background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; max-height: 9.5em; overflow: hidden; position: relative; }
+  .desc.open { max-height: none; }
+  .desc:not(.open)::after { content: ""; position: absolute; inset: auto 0 0 0; height: 2.5em; background: linear-gradient(transparent, var(--card)); }
+  .more { border: 0; background: none; color: var(--accent); font-weight: 600; padding: 0 0 12px; font-size: 14px; }
+  .go { width: 100%; margin-bottom: 16px; }
+  .sec { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; margin: 4px 2px 8px; }
+  .chapters { border: 1px solid var(--line); border-radius: 14px; background: var(--card); overflow: hidden; }
+  .ch { display: flex; gap: 10px; align-items: center; width: 100%; border: 0; border-top: 1px solid var(--line); background: none; text-align: left; padding: 12px 14px; min-height: 48px; }
+  .ch:first-child { border-top: 0; }
+  .ch .n { color: var(--muted); font-size: 13px; min-width: 2.2em; font-variant-numeric: tabular-nums; }
+  .ch .ct { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ch .w { color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .ch.cur { background: var(--accent-soft); }
+  .ch.cur .ct { color: var(--accent); font-weight: 650; }
+
+  /* Trang đọc */
+  body.reading-mode { background: var(--read-bg); }
+  .rtop { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 8px; padding: calc(var(--safe-t) + 6px) 12px 8px; background: color-mix(in srgb, var(--read-bg) 92%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); transition: transform .2s; }
+  .rtop.hide { transform: translateY(-100%); }
+  .rtop .rt { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
+  .rtop .icon-btn { width: 36px; height: 36px; background: transparent; border-color: transparent; }
+  .page { max-width: 680px; margin: 0 auto; padding: 18px 20px calc(var(--safe-b) + 40px); color: var(--read-text); font-family: var(--serif); font-size: var(--fs, 19px); line-height: 1.75; overflow-wrap: break-word; }
+  .page h2 { font-family: var(--font); font-size: 1.15em; line-height: 1.35; margin: 6px 0 22px; color: var(--read-text); }
+  .page p { margin: 0 0 .8em; }
+  .page p.gap { height: .4em; margin: 0; }
+  .page p.sep { text-align: center; letter-spacing: .3em; color: var(--muted); margin: 1.2em 0; }
+  .page img { max-width: 100%; height: auto; display: block; margin: .6em auto 1em; border-radius: 6px; }
+  .page .miss { font-family: var(--font); font-size: 13px; color: var(--muted); text-align: center; }
+  .nav { display: flex; gap: 10px; max-width: 680px; margin: 0 auto; padding: 0 20px calc(var(--safe-b) + 30px); }
+  .nav .btn { flex: 1; }
+  .prog { position: fixed; left: 0; right: 0; bottom: 0; height: calc(3px + var(--safe-b) * 0); z-index: 6; background: transparent; pointer-events: none; }
+  .prog i { display: block; height: 3px; background: var(--accent); width: 0; transition: width .1s linear; }
+
+  /* Bảng tuỳ chọn (trượt từ dưới lên) */
+  .sheet-bg { position: fixed; inset: 0; background: rgb(0 0 0 / .35); z-index: 20; animation: fade .15s; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; background: var(--card); border-radius: 20px 20px 0 0; padding: 10px 16px calc(var(--safe-b) + 18px); max-height: 85vh; overflow: auto; animation: up .2s ease-out; max-width: 720px; margin: 0 auto; }
+  .sheet .grip { width: 40px; height: 5px; border-radius: 5px; background: var(--line); margin: 0 auto 12px; }
+  .sheet h3 { margin: 4px 0 12px; font-size: 18px; }
+  .row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .row:first-of-type { border-top: 0; }
+  .row > span { flex: 1; }
+  .row small { display: block; color: var(--muted); font-size: 13px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .seg button { border: 0; background: none; padding: 8px 11px; font-size: 14px; min-width: 44px; }
+  .seg button.on { background: var(--accent); color: #fff; }
+  .stat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 4px 0 12px; }
+  .stat div { background: var(--field); border-radius: 12px; padding: 10px; text-align: center; }
+  .stat b { display: block; font-size: 18px; }
+  .stat small { color: var(--muted); font-size: 12px; }
+  .sheet .btn { width: 100%; margin-top: 8px; }
+  .toc .ch { padding: 11px 4px; }
+
+  .toast { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 24px); transform: translateX(-50%); z-index: 30; background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; max-width: calc(100% - 32px); box-shadow: 0 8px 24px rgb(0 0 0 / .2); animation: up .2s ease-out; }
+  .toast.err { background: var(--err); color: #fff; }
+  .busy { position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / .35); display: grid; place-items: center; }
+  .busy div { background: var(--card); padding: 18px 22px; border-radius: 16px; font-weight: 600; display: flex; gap: 10px; align-items: center; }
+  .spin { width: 18px; height: 18px; border: 2.5px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes up { from { transform: translateY(30px); opacity: 0; } }
+  @keyframes fade { from { opacity: 0; } }
+  @media (min-width: 720px) { .sheet { border-radius: 20px; bottom: 16px; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<input type="file" id="file" hidden>
+<script>
+'use strict';
+/* Đọc truyện: web app chỉ đọc. Truyện nằm trong máy (IndexedDB), nhập từ file .wmkho xuất ở app TienIchWM (📱 Xuất cho điện thoại).
+   Nhập kho mới = thay toàn bộ kho cũ (làm trong một giao dịch: lỗi giữa chừng thì kho cũ còn nguyên), chỗ đang đọc vẫn giữ. */
+const FORMAT = 'TienIchWM-kho';
+const $app = document.getElementById('app'), $file = document.getElementById('file');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const num = n => Number(n || 0).toLocaleString('vi-VN');
+const key2 = (a, b) => a + '\n' + b;
+
+/* ---- Tuỳ chọn nhỏ (cỡ chữ, chủ đề): lưu trong máy, không lưu được thì dùng mặc định ---- */
+const prefs = (() => { try { return JSON.parse(localStorage.getItem('doc-prefs') || '{}'); } catch { return {}; } })();
+prefs.theme ??= 'auto'; prefs.fs ??= 19; prefs.hint ??= true;
+function savePrefs() { try { localStorage.setItem('doc-prefs', JSON.stringify(prefs)); } catch {} }
+function applyPrefs() { document.documentElement.dataset.theme = prefs.theme; document.documentElement.style.setProperty('--fs', prefs.fs + 'px'); }
+applyPrefs();
+
+/* ---- IndexedDB ---- */
+let dbp = null;
+function db() {
+  return dbp ??= new Promise((ok, bad) => {
+    const r = indexedDB.open('doc-truyen', 1);
+    r.onupgradeneeded = () => {
+      const d = r.result;
+      for (const [n, k] of [['stories', 'id'], ['pos', 'id']]) if (!d.objectStoreNames.contains(n)) d.createObjectStore(n, { keyPath: k });
+      for (const n of ['texts', 'images', 'meta']) if (!d.objectStoreNames.contains(n)) d.createObjectStore(n);
+    };
+    r.onsuccess = () => ok(r.result);
+    r.onerror = () => bad(r.error || new Error('Không mở được bộ nhớ trình duyệt'));
+  });
+}
+const req = r => new Promise((ok, bad) => { r.onsuccess = () => ok(r.result); r.onerror = () => bad(r.error); });
+async function get(store, key) { const d = await db(); return req(d.transaction(store).objectStore(store).get(key)); }
+async function all(store) { const d = await db(); return req(d.transaction(store).objectStore(store).getAll()); }
+async function put(store, value, key) { const d = await db(); const tx = d.transaction(store, 'readwrite'); tx.objectStore(store).put(value, key); return done(tx); }
+const done = tx => new Promise((ok, bad) => { tx.oncomplete = () => ok(); tx.onerror = () => bad(tx.error); tx.onabort = () => bad(tx.error || new Error('Bị huỷ')); });
+
+/* ---- Trạng thái ---- */
+const S = { stories: [], pos: new Map(), meta: null, view: 'list', sid: null, cid: null, q: '' };
+async function load() {
+  const [stories, pos, meta] = await Promise.all([all('stories'), all('pos'), get('meta', 'info')]);
+  S.stories = stories.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  S.pos = new Map(pos.map(p => [p.id, p]));
+  S.meta = meta || null;
+}
+const story = id => S.stories.find(s => s.id === id);
+
+/* ---- Nhập kho ---- */
+async function readKho(file) {
+  const buf = await file.arrayBuffer(), b = new Uint8Array(buf, 0, Math.min(2, buf.byteLength));
+  let text;
+  if (b[0] === 0x1f && b[1] === 0x8b) {
+    if (typeof DecompressionStream === 'undefined') throw new Error('Trình duyệt này cũ quá, không giải nén được file kho. Cập nhật iOS (16.4 trở lên) rồi thử lại nhé');
+    text = await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+  } else text = new TextDecoder().decode(buf);
+  let kho;
+  try { kho = JSON.parse(text); } catch { throw new Error('File không đọc được. Chọn đúng file .wmkho xuất từ app TienIchWM nhé'); }
+  if (!kho || kho.format !== FORMAT || !Array.isArray(kho.stories)) throw new Error('Đây không phải file kho truyện (.wmkho) xuất từ app TienIchWM');
+  if (kho.version > 1) throw new Error('File kho làm từ bản app mới hơn, tải lại trang này (khi có mạng) rồi nhập lại nhé');
+  return kho;
+}
+async function importKho(file) {
+  showBusy('Đang đọc file…');
+  try {
+    const kho = await readKho(file);
+    showBusy('Đang lưu truyện vào máy…');
+    try { await navigator.storage?.persist?.(); } catch {} // xin giữ dữ liệu lâu dài (iOS 17+), không được thì thôi
+    const pos = await all('pos');
+    const d = await db();
+    const tx = d.transaction(['stories', 'texts', 'images', 'pos', 'meta'], 'readwrite');
+    const os = n => tx.objectStore(n);
+    // Xoá kho cũ rồi ghi kho mới trong cùng một giao dịch: lỗi giữa chừng thì không gì thay đổi
+    os('stories').clear(); os('texts').clear(); os('images').clear();
+    let chapters = 0;
+    const keep = new Map();
+    kho.stories.forEach((s, i) => {
+      if (!s || !s.id) return;
+      const chs = (s.chapters || []).filter(c => c && c.id).map(c => ({ id: String(c.id), title: String(c.title || ''), words: Number(c.words) || 0 }));
+      const meta = { id: String(s.id), order: i, title: String(s.title || 'Truyện'), author: String(s.author || ''), link: String(s.link || ''),
+        categories: Array.isArray(s.categories) ? s.categories.map(String) : [], description: String(s.description || ''), updated: s.updated || '',
+        cover: typeof s.cover === 'string' && s.cover.startsWith('data:image/') ? s.cover : null, chapters: chs, read: s.read || null };
+      os('stories').put(meta);
+      for (const c of s.chapters || []) if (c && c.id) os('texts').put(String(c.text || ''), key2(meta.id, String(c.id)));
+      for (const [name, url] of Object.entries(s.images || {})) if (typeof url === 'string' && url.startsWith('data:image/')) os('images').put(url, key2(meta.id, name));
+      chapters += chs.length;
+      keep.set(meta.id, meta);
+    });
+    // Chỗ đang đọc: giữ của truyện / chương còn trong kho, bỏ phần thừa; truyện chưa đọc trên điện thoại thì lấy chỗ đọc trên máy tính
+    for (const p of pos) {
+      const s = keep.get(p.id);
+      if (!s || !s.chapters.some(c => c.id === p.chapter)) os('pos').delete(p.id);
+    }
+    for (const s of keep.values()) {
+      if (s.read?.chapter && s.chapters.some(c => c.id === s.read.chapter) && !pos.some(p => p.id === s.id && s.chapters.some(c => c.id === p.chapter)))
+        os('pos').put({ id: s.id, chapter: String(s.read.chapter), offset: Math.min(1, Math.max(0, Number(s.read.offset) || 0)), at: 0 });
+    }
+    os('meta').put({ imported: new Date().toISOString(), exported: kho.exported || '', file: file.name, stories: keep.size, chapters }, 'info');
+    await done(tx);
+    await load();
+    hideBusy();
+    S.view = 'list'; S.sid = S.cid = null; render();
+    toast(`✓ Đã nhập ${num(keep.size)} truyện, ${num(chapters)} chương. File trong app Tệp xoá đi được rồi nhé`);
+  } catch (e) {
+    hideBusy();
+    toast(e?.name === 'QuotaExceededError' ? 'Điện thoại hết chỗ lưu, kho cũ vẫn giữ nguyên. Dọn bớt bộ nhớ rồi thử lại nhé' : (e?.message || 'Không nhập được file') + ' · Kho cũ vẫn giữ nguyên', true);
+  }
+}
+$file.addEventListener('change', () => { const f = $file.files[0]; $file.value = ''; if (f) importKho(f); });
+const pickFile = () => $file.click();
+
+async function wipe() {
+  if (!confirm('Xoá toàn bộ truyện và chỗ đang đọc trên máy này? (Truyện trên máy tính không bị ảnh hưởng)')) return;
+  const d = await db();
+  const tx = d.transaction(['stories', 'texts', 'images', 'pos', 'meta'], 'readwrite');
+  for (const n of ['stories', 'texts', 'images', 'pos', 'meta']) tx.objectStore(n).clear();
+  await done(tx);
+  await load();
+  closeSheet(); S.view = 'list'; render(); toast('Đã xoá toàn bộ dữ liệu');
+}
+
+/* ---- Vẽ giao diện ---- */
+const initial = t => (String(t || '?').trim()[0] || '?').toUpperCase();
+function hue(t) { let h = 0; for (const c of String(t)) h = (h * 31 + c.codePointAt(0)) % 360; return h; }
+function coverHtml(s) {
+  if (s.cover) return `<div class="cover"><img src="${esc(s.cover)}" alt=""></div>`;
+  const h = hue(s.title);
+  return `<div class="cover" style="--c1:hsl(${h} 45% 52%);--c2:hsl(${(h + 50) % 360} 40% 34%)">${esc(initial(s.title))}</div>`;
+}
+function progress(s) {
+  const p = S.pos.get(s.id), n = s.chapters.length;
+  if (!p || !n) return null;
+  const i = s.chapters.findIndex(c => c.id === p.chapter);
+  if (i < 0) return null;
+  return { i, n, ratio: (i + (p.offset || 0)) / n };
+}
+function render() {
+  document.body.classList.toggle('reading-mode', S.view === 'read');
+  if (S.view === 'story' && story(S.sid)) return storyView();
+  if (S.view === 'read' && story(S.sid)) return readView();
+  S.view = 'list';
+  listView();
+}
+
+const standalone = () => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+const isIos = () => /iP(hone|ad|od)/.test(navigator.userAgent) || navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+function hintHtml() {
+  if (standalone() || !prefs.hint) return '';
+  return `<div class="hint"><span>📲</span><span>${isIos() ? 'Bấm <b>Chia sẻ</b> → <b>Thêm vào MH chính</b> rồi mở từ biểu tượng đó để đọc offline và giữ truyện lâu dài. Nhập kho <b>trong biểu tượng đó</b> nhé (tab Safari thường có bộ nhớ riêng).' : 'Cài trang này thành ứng dụng (menu trình duyệt → <b>Cài đặt / Thêm vào màn hình chính</b>) để đọc offline.'}</span><button data-act="hint-x" aria-label="Ẩn gợi ý">✕</button></div>`;
+}
+
+function listView() {
+  const n = S.stories.length;
+  if (!n) {
+    $app.innerHTML = `<div class="wrap"><div class="top"><h1>Đọc truyện</h1><button class="icon-btn" data-act="menu" aria-label="Tuỳ chọn">⋯</button></div>${hintHtml()}
+      <div class="empty"><div class="big">📚</div><h2>Tủ truyện còn trống</h2>
+        <p>Nhập file kho <b>.wmkho</b> xuất từ app TienIchWM trên máy tính. Truyện được lưu ngay trong máy, đọc được cả khi không có mạng.</p>
+        <button class="btn primary" data-act="import">📥 Nhập kho</button>
+        <ol class="steps">
+          <li>Máy tính: <b>Kho truyện → 📱 Xuất cho điện thoại → Xuất file</b></li>
+          <li>Gửi file qua Zalo, mở file → <b>Chia sẻ → Lưu vào Tệp</b></li>
+          <li>Ở đây bấm <b>Nhập kho</b> rồi chọn file vừa lưu</li>
+        </ol></div></div>`;
+    return;
+  }
+  const q = S.q.trim().toLowerCase();
+  const rows = S.stories.filter(s => !q || [s.title, s.author, ...s.categories].some(x => String(x).toLowerCase().includes(q)));
+  // Truyện đang đọc dở (đọc gần nhất) lên đầu
+  rows.sort((a, b) => (S.pos.get(b.id)?.at || 0) - (S.pos.get(a.id)?.at || 0) || a.order - b.order);
+  $app.innerHTML = `<div class="wrap"><div class="top"><h1>Tủ truyện<small>${num(n)} truyện</small></h1><button class="icon-btn" data-act="import" aria-label="Nhập kho mới">📥</button><button class="icon-btn" data-act="menu" aria-label="Tuỳ chọn">⋯</button></div>
+    ${hintHtml()}
+    <input class="search" type="search" placeholder="Tìm tên truyện, tác giả, thẻ…" value="${esc(S.q)}" data-q aria-label="Tìm truyện" enterkeyhint="search">
+    <div class="list">${rows.map(s => {
+      const p = progress(s);
+      return `<button class="card" data-act="story" data-id="${esc(s.id)}">${coverHtml(s)}<div class="info"><div class="t">${esc(s.title)}</div>
+        ${s.author ? `<div class="a">${esc(s.author)}</div>` : ''}
+        <div class="p">${p ? `<span class="reading">Chương ${p.i + 1}/${p.n}</span><span class="bar"><i style="width:${Math.round(p.ratio * 100)}%"></i></span>` : `${num(s.chapters.length)} chương`}</div></div></button>`;
+    }).join('') || '<div class="empty"><p>Không có truyện nào khớp.</p></div>'}</div></div>`;
+}
+
+function storyView() {
+  const s = story(S.sid), p = progress(s), words = s.chapters.reduce((a, c) => a + c.words, 0);
+  const cur = p ? s.chapters[p.i].id : null;
+  $app.innerHTML = `<div class="wrap"><div class="top"><button class="icon-btn" data-act="back" aria-label="Quay lại">‹</button><span style="flex:1"></span><button class="icon-btn" data-act="menu" aria-label="Tuỳ chọn">⋯</button></div>
+    <div class="story-head">${coverHtml(s)}<div><h2>${esc(s.title)}</h2>${s.author ? `<div class="a">${esc(s.author)}</div>` : ''}
+      <div class="meta">${num(s.chapters.length)} chương · ${num(words)} từ</div></div></div>
+    ${s.categories.length ? `<div class="tags">${s.categories.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
+    ${s.description ? `<div class="desc" data-desc>${esc(s.description)}</div><button class="more" data-act="more">Xem thêm</button>` : ''}
+    ${s.chapters.length ? `<button class="btn primary go" data-act="read" data-cid="${esc(cur || s.chapters[0].id)}">${p ? `Đọc tiếp · Chương ${p.i + 1}` : 'Bắt đầu đọc'}</button>` : ''}
+    <div class="sec">Mục lục</div>
+    <div class="chapters">${s.chapters.map((c, i) => `<button class="ch${c.id === cur ? ' cur' : ''}" data-act="read" data-cid="${esc(c.id)}"><span class="n">${i + 1}</span><span class="ct">${esc(c.title)}</span><span class="w">${num(c.words)}</span></button>`).join('') || '<div class="ch">Truyện chưa có chương nào.</div>'}</div></div>`;
+  const d = $app.querySelector('[data-desc]');
+  if (d && d.scrollHeight <= d.clientHeight + 4) { d.classList.add('open'); $app.querySelector('[data-act=more]')?.remove(); }
+  if (S.scrollTo != null) { scrollTo(0, S.scrollTo); S.scrollTo = null; } else scrollTo(0, 0);
+}
+
+function paragraphs(text, sid, images) {
+  const out = [];
+  let gap = false;
+  for (const raw of String(text).split('\n')) {
+    const line = raw.trim();
+    if (!line) { gap = out.length > 0; continue; }
+    if (gap) { out.push('<p class="gap"></p>'); gap = false; }
+    const m = /^\[ảnh:([A-Za-z0-9_-]{1,40}\.(?:png|jpg|jpeg|gif|bmp|webp))\]$/i.exec(line);
+    if (m) out.push(images.get(m[1]) ? `<img src="${esc(images.get(m[1]))}" alt="">` : '<p class="miss">(ảnh không có trong kho)</p>');
+    else if (line === '* * *') out.push('<p class="sep">* * *</p>');
+    else out.push(`<p>${esc(line)}</p>`);
+  }
+  return out.join('');
+}
+
+let saveTimer = 0, lastY = 0;
+async function readView() {
+  const s = story(S.sid), i = s.chapters.findIndex(c => c.id === S.cid);
+  if (i < 0) { S.view = 'story'; return render(); }
+  const c = s.chapters[i];
+  const text = (await get('texts', key2(s.id, c.id))) ?? '';
+  const images = new Map();
+  if (text.includes('[ảnh:')) for (const m of text.matchAll(/^\[ảnh:([^\]\n]+)\]\s*$/gim)) { const u = await get('images', key2(s.id, m[1])); if (u) images.set(m[1], u); }
+  if (S.view !== 'read' || S.cid !== c.id) return; // đã chuyển trang trong lúc đọc dữ liệu
+  $app.innerHTML = `<div class="rtop" data-rtop><button class="icon-btn" data-act="back" aria-label="Về trang truyện">‹</button><div class="rt">${esc(s.title)}</div><button class="icon-btn" data-act="toc" aria-label="Mục lục">☰</button><button class="icon-btn" data-act="menu" aria-label="Cỡ chữ, chủ đề">Aa</button></div>
+    <article class="page"><h2>${esc(c.title)}</h2>${paragraphs(text, s.id, images) || '<p class="miss">Chương này không có chữ.</p>'}</article>
+    <div class="nav"><button class="btn" data-act="go" data-step="-1"${i === 0 ? ' disabled' : ''}>‹ Chương trước</button><button class="btn${i < s.chapters.length - 1 ? ' primary' : ''}" data-act="go" data-step="1"${i === s.chapters.length - 1 ? ' disabled' : ''}>Chương sau ›</button></div>
+    <div class="prog"><i data-prog></i></div>`;
+  const p = S.pos.get(s.id);
+  const offset = S.restore === false ? 0 : p && p.chapter === c.id ? p.offset || 0 : 0;
+  S.restore = true;
+  // Chờ ảnh chèn hiện xong (đổi chiều cao trang) rồi mới cuộn tới chỗ đang đọc
+  await Promise.all([...$app.querySelectorAll('.page img')].map(i => i.decode().catch(() => {})));
+  if (S.view !== 'read' || S.cid !== c.id) return;
+  scrollTo(0, offset * maxY()); lastY = scrollY; updateProg();
+  savePos(true);
+}
+const maxY = () => Math.max(0, document.documentElement.scrollHeight - innerHeight);
+const ratio = () => { const m = maxY(); return m > 0 ? Math.min(1, Math.max(0, scrollY / m)) : 0; };
+function updateProg() { const b = document.querySelector('[data-prog]'); if (b) b.style.width = (ratio() * 100).toFixed(1) + '%'; }
+async function savePos(now) {
+  if (S.view !== 'read' || !S.sid || !S.cid) return;
+  clearTimeout(saveTimer);
+  const write = () => {
+    const p = { id: S.sid, chapter: S.cid, offset: Math.round(ratio() * 10000) / 10000, at: Date.now() };
+    S.pos.set(p.id, p);
+    put('pos', p).catch(() => {});
+  };
+  if (now) write(); else saveTimer = setTimeout(write, 400);
+}
+addEventListener('scroll', () => {
+  if (S.view !== 'read') return;
+  updateProg();
+  const bar = document.querySelector('[data-rtop]');
+  if (bar) bar.classList.toggle('hide', scrollY > lastY + 4 && scrollY > 80);
+  if (bar && scrollY < lastY - 4) bar.classList.remove('hide');
+  lastY = scrollY;
+  savePos(false);
+}, { passive: true });
+addEventListener('pagehide', () => savePos(true));
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') savePos(true); });
+
+/* ---- Bảng tuỳ chọn ---- */
+function closeSheet() { document.querySelectorAll('.sheet, .sheet-bg').forEach(x => x.remove()); }
+function openSheet(html) {
+  closeSheet();
+  document.body.insertAdjacentHTML('beforeend', `<div class="sheet-bg" data-act="close"></div><div class="sheet" role="dialog"><div class="grip"></div>${html}</div>`);
+}
+async function usage() {
+  try { const e = await navigator.storage?.estimate?.(); return e?.usage ?? null; } catch { return null; }
+}
+async function menu() {
+  const reading = S.view === 'read';
+  const themes = [['auto', 'Tự động'], ['paper', 'Giấy'], ['light', 'Sáng'], ['dark', 'Tối']];
+  const settings = `<div class="row"><span>Cỡ chữ<small>${prefs.fs}px</small></span><div class="seg"><button data-act="fs" data-d="-1" aria-label="Chữ nhỏ hơn">A−</button><button data-act="fs" data-d="1" aria-label="Chữ to hơn">A+</button></div></div>
+    <div class="row"><span>Chủ đề</span><div class="seg">${themes.map(([k, l]) => `<button data-act="theme" data-k="${k}" class="${prefs.theme === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>`;
+  if (reading) { openSheet(`<h3>Trình bày</h3>${settings}`); return; }
+  const m = S.meta, chapters = S.stories.reduce((a, s) => a + s.chapters.length, 0);
+  openSheet(`<h3>Tuỳ chọn</h3>
+    <div class="stat"><div><b>${num(S.stories.length)}</b><small>truyện</small></div><div><b>${num(chapters)}</b><small>chương</small></div><div><b data-used>…</b><small>đang dùng</small></div></div>
+    ${m ? `<div class="row"><span>Kho hiện tại<small>${esc(m.file)} · nhập ${new Date(m.imported).toLocaleString('vi-VN')}</small></span></div>` : ''}
+    ${settings}
+    <button class="btn primary" data-act="import">📥 Nhập kho mới (thay kho cũ)</button>
+    ${S.stories.length ? '<button class="btn danger" data-act="wipe">🗑 Xoá toàn bộ dữ liệu</button>' : ''}`);
+  const u = await usage();
+  const b = document.querySelector('[data-used]');
+  if (b) b.textContent = u == null ? '—' : u < 1e6 ? '< 1 MB' : (u / 1e6).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + ' MB';
+}
+function toc() {
+  const s = story(S.sid);
+  openSheet(`<h3>Mục lục</h3><div class="toc">${s.chapters.map((c, i) => `<button class="ch${c.id === S.cid ? ' cur' : ''}" data-act="read" data-cid="${esc(c.id)}" data-fresh="1"><span class="n">${i + 1}</span><span class="ct">${esc(c.title)}</span></button>`).join('')}</div>`);
+  document.querySelector('.toc .cur')?.scrollIntoView({ block: 'center' });
+}
+
+/* ---- Thông báo ---- */
+let toastTimer = 0;
+function toast(text, err) {
+  document.querySelector('.toast')?.remove();
+  clearTimeout(toastTimer);
+  document.body.insertAdjacentHTML('beforeend', `<div class="toast${err ? ' err' : ''}" role="status">${esc(text)}</div>`);
+  toastTimer = setTimeout(() => document.querySelector('.toast')?.remove(), err ? 6000 : 3500);
+}
+function showBusy(text) { hideBusy(); document.body.insertAdjacentHTML('beforeend', `<div class="busy"><div><span class="spin"></span>${esc(text)}</div></div>`); }
+function hideBusy() { document.querySelector('.busy')?.remove(); }
+
+/* ---- Sự kiện ---- */
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]');
+  if (!t || t.disabled) return;
+  const a = t.dataset.act;
+  if (a === 'import') { closeSheet(); pickFile(); }
+  else if (a === 'menu') menu();
+  else if (a === 'close') closeSheet();
+  else if (a === 'wipe') wipe();
+  else if (a === 'hint-x') { prefs.hint = false; savePrefs(); t.closest('.hint')?.remove(); }
+  else if (a === 'story') { S.listY = scrollY; go({ view: 'story', sid: t.dataset.id }); }
+  else if (a === 'more') { $app.querySelector('[data-desc]')?.classList.add('open'); t.remove(); }
+  else if (a === 'read') { closeSheet(); if (t.dataset.fresh || S.view === 'story') S.restore = t.dataset.cid === S.pos.get(S.sid)?.chapter; go({ view: 'read', sid: S.sid, cid: t.dataset.cid }, S.view === 'read'); } // đổi chương trong lúc đọc: nút quay lại vẫn về trang truyện
+  else if (a === 'go') { const s = story(S.sid), i = s.chapters.findIndex(c => c.id === S.cid) + Number(t.dataset.step); if (s.chapters[i]) { savePos(true); S.restore = false; go({ view: 'read', sid: S.sid, cid: s.chapters[i].id }, true); } }
+  else if (a === 'toc') toc();
+  else if (a === 'back') history.back();
+  else if (a === 'fs') { prefs.fs = Math.min(28, Math.max(14, prefs.fs + Number(t.dataset.d))); savePrefs(); applyPrefs(); menu(); }
+  else if (a === 'theme') { prefs.theme = t.dataset.k; savePrefs(); applyPrefs(); menu(); }
+});
+document.addEventListener('input', e => { if (e.target.matches('[data-q]')) { S.q = e.target.value; const at = e.target.selectionStart; listView(); const q = $app.querySelector('[data-q]'); q.focus(); q.setSelectionRange(at, at); } });
+
+/* ---- Điều hướng: dùng lịch sử trình duyệt để vuốt / nút quay lại hoạt động ---- */
+function go(state, replace) {
+  if (S.view === 'read') savePos(true);
+  Object.assign(S, state);
+  const h = state.view === 'list' ? '#' : state.view === 'story' ? `#s=${encodeURIComponent(state.sid)}` : `#s=${encodeURIComponent(state.sid)}&c=${encodeURIComponent(state.cid)}`;
+  history[replace ? 'replaceState' : 'pushState']({ view: state.view, sid: state.sid ?? null, cid: state.cid ?? null }, '', h);
+  render();
+}
+addEventListener('popstate', e => {
+  if (S.view === 'read') savePos(true);
+  const st = e.state || { view: 'list' };
+  const was = S.view;
+  S.view = st.view; S.sid = st.sid; S.cid = st.cid;
+  closeSheet();
+  render();
+  if (S.view === 'list' && was !== 'list' && S.listY != null) scrollTo(0, S.listY);
+});
+
+(async () => {
+  try {
+    await load();
+  } catch (e) {
+    $app.innerHTML = `<div class="wrap"><div class="empty"><div class="big">⚠️</div><h2>Không mở được bộ nhớ</h2><p>${esc(e.message)}. Nếu đang ở chế độ duyệt web riêng tư, mở trang ở tab thường nhé.</p></div></div>`;
+    return;
+  }
+  // Mở lại đúng trang đang xem (khi tải lại trang)
+  const h = new URLSearchParams(location.hash.slice(1));
+  const sid = h.get('s'), cid = h.get('c');
+  if (sid && story(sid)) {
+    history.replaceState({ view: 'list' }, '', '#');
+    history.pushState({ view: 'story', sid, cid: null }, '', `#s=${encodeURIComponent(sid)}`);
+    if (cid && story(sid).chapters.some(c => c.id === cid)) { history.pushState({ view: 'read', sid, cid }, '', location.hash + `&c=${encodeURIComponent(cid)}`); Object.assign(S, { view: 'read', sid, cid }); }
+    else Object.assign(S, { view: 'story', sid });
+  } else history.replaceState({ view: 'list' }, '', location.pathname + location.search);
+  render();
+})();
+
+// Lưu giao diện vào máy để mở được khi không có mạng
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+</script>
+</body>
+</html>

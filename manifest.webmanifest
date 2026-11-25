@@ -1,0 +1,16 @@
+{
+  "name": "Đọc truyện",
+  "short_name": "Đọc truyện",
+  "description": "Đọc kho truyện xuất từ TienIchWM, đọc offline",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f1e7",
+  "theme_color": "#f6f1e7",
+  "lang": "vi",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
