@@ -370,7 +370,7 @@
 'use strict';
 /* Đọc truyện: web app chỉ đọc. Truyện nằm trong máy (IndexedDB), nhập từ file .wmkho xuất ở app TienIchWM (📱 Xuất kho).
    Nhập kho: so với tủ sách đang có, hiện truyện mới / có bản mới hơn / trùng y hệt để chọn rồi mới lưu (một giao dịch: lỗi giữa chừng thì không đổi gì), chỗ đang đọc vẫn giữ. */
-const APP_VERSION = '3.0.1 · 26/11/2026';
+const APP_VERSION = '3.0.2 · 26/11/2026';
 const FORMAT = 'TienIchWM-kho';
 const $app = document.getElementById('app'), $file = document.getElementById('file');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -463,7 +463,7 @@ async function readKho(file) {
   const buf = await file.arrayBuffer(), b = new Uint8Array(buf, 0, Math.min(2, buf.byteLength));
   let text;
   if (b[0] === 0x1f && b[1] === 0x8b) {
-    if (typeof DecompressionStream === 'undefined') throw new Error('Trình duyệt này cũ quá, không giải nén được file kho. Cập nhật iOS (16.4 trở lên) rồi thử lại nhé');
+    if (typeof DecompressionStream === 'undefined') throw new Error('Trình duyệt này cũ quá, không giải nén được file kho. Cập nhật iOS (16.4 trở lên) hoặc Chrome trên Android rồi thử lại nhé');
     text = await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
   } else text = new TextDecoder().decode(buf);
   let kho;
@@ -1104,7 +1104,7 @@ async function settingsView() {
     <div class="group-t">Giao diện</div>
     <div class="group">${themeItem()}
       <div class="item stack"><span>Màu nhấn</span><div class="dots">${ACCENTS.map(([k, l, c]) => `<button class="dot${prefs.accent === k ? ' on' : ''}" style="background:${c}" data-set="accent" data-v="${k}" aria-label="${l}" title="${l}"></button>`).join('')}</div></div></div>
-    <div class="group-f">“Tự động” đổi sáng / tối theo cài đặt của iPhone (Cài đặt → Màn hình &amp; Độ sáng).</div>
+    <div class="group-f">“Tự động” đổi sáng / tối theo cài đặt sáng / tối của điện thoại.</div>
 
     <div class="group-t">Trang đọc</div>
     <div class="group">
@@ -1142,7 +1142,7 @@ async function settingsView() {
 
     <div class="group-t">Khác</div>
     <div class="group">
-      ${toggle('hint', 'Hiện gợi ý “Thêm vào MH chính”', 'Chỉ hiện khi mở bằng tab Safari thường')}
+      ${toggle('hint', 'Hiện gợi ý “Thêm vào MH chính”', 'Chỉ hiện khi mở bằng tab trình duyệt thường')}
       <button class="item act" data-act="reset-prefs"><span class="ico">${icon('undo')}</span><span class="lbl">Khôi phục cài đặt mặc định</span></button>
     </div>
     <div class="about">Đọc truyện · phiên bản ${APP_VERSION}<br>${standalone() ? 'Đang chạy như ứng dụng trên màn hình chính' : 'Đang mở trong trình duyệt'}</div></div>`;
@@ -1155,7 +1155,7 @@ async function settingsView() {
   try {
     const p = await navigator.storage?.persisted?.();
     const x = document.querySelector('[data-persist]');
-    if (x) x.textContent = p ? '✓ Đã bật: iPhone không tự xoá truyện khi thiếu bộ nhớ' : standalone() ? 'Chưa bật (bật tự động khi nhập kho, tuỳ phiên bản iOS)' : 'Mở từ biểu tượng trên màn hình chính để dữ liệu được giữ lâu dài';
+    if (x) x.textContent = p ? `✓ Đã bật: ${isIos() ? 'iPhone' : 'máy'} không tự xoá truyện khi thiếu bộ nhớ` : standalone() ? `Chưa bật (bật tự động khi nhập kho, tuỳ phiên bản ${isIos() ? 'iOS' : 'trình duyệt'})` : 'Mở từ biểu tượng trên màn hình chính để dữ liệu được giữ lâu dài';
   } catch {}
 }
 function setPref(k, v) {
