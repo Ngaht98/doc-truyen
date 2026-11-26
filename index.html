@@ -20,7 +20,7 @@
     --bg: #f6f1e7; --card: #fffdf8; --text: #2b2620; --muted: #877d70; --line: #e7dfd0; --field: #efe8da;
     --read-bg: #fbf6ec; --read-text: #2e2922;
     --accent: #b5543c; --on-accent: #fff; --err: #b3392f;
-    --accent-soft: color-mix(in srgb, var(--accent) 14%, var(--card));
+    --accent-soft: var(--field);
     --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px);
     /* trang đọc (đổi trong Cài đặt) */
@@ -41,8 +41,12 @@
   :root[data-accent="purple"] { --accent: #7b4fc9; }
   :root[data-accent="gray"] { --accent: #5d6470; }
   /* chủ đề tối: màu nhấn sáng hơn cho dễ nhìn */
-  :root[data-theme="dark"], :root[data-theme="black"] { --accent: color-mix(in srgb, var(--accent-base, #b5543c) 70%, #fff); }
-  @media (prefers-color-scheme: dark) { :root[data-theme="auto"] { --accent: color-mix(in srgb, var(--accent-base, #b5543c) 70%, #fff); } }
+  /* (máy cũ chưa có color-mix: giữ màu nhấn gốc, nền nhạt dùng màu ô nhập) */
+  @supports (color: color-mix(in srgb, red, red)) {
+    :root { --accent-soft: color-mix(in srgb, var(--accent) 14%, var(--card)); }
+    :root[data-theme="dark"], :root[data-theme="black"] { --accent: color-mix(in srgb, var(--accent-base, #b5543c) 70%, #fff); }
+    @media (prefers-color-scheme: dark) { :root[data-theme="auto"] { --accent: color-mix(in srgb, var(--accent-base, #b5543c) 70%, #fff); } }
+  }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; }
@@ -125,8 +129,8 @@
   .cover { width: 64px; aspect-ratio: 2 / 3; border-radius: 10px; flex: none; overflow: hidden; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 25px; background: linear-gradient(150deg, var(--c1, #c0705a), var(--c2, #7a3b5c)); }
   .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .card .info { min-width: 0; flex: 1; display: grid; align-content: center; gap: 4px; }
-  .card .t { font-weight: 650; font-size: 16px; line-height: 1.32; overflow-wrap: anywhere; }
-  .card .a { color: var(--muted); font-size: 13.5px; overflow-wrap: anywhere; }
+  .card .t { font-weight: 650; font-size: 16px; line-height: 1.32; overflow-wrap: break-word; overflow-wrap: anywhere; }
+  .card .a { color: var(--muted); font-size: 13.5px; overflow-wrap: break-word; overflow-wrap: anywhere; }
   .card .m { color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
   .card .tg { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
   .card .tg span { font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
@@ -141,8 +145,8 @@
   .tile { border: 0; background: none; padding: 0; text-align: left; color: var(--text); display: grid; gap: 6px; }
   .tile .cover { width: 100%; font-size: 34px; border-radius: 12px; box-shadow: 0 4px 14px rgb(0 0 0 / .1); position: relative; }
   .tile .cover .bar { position: absolute; left: 6px; right: 6px; bottom: 6px; max-width: none; background: rgb(255 255 255 / .55); }
-  .tile .t { font-size: 13.5px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
-  .tile .a { font-size: 12px; color: var(--muted); margin-top: -3px; overflow-wrap: anywhere; }
+  .tile .t { font-size: 13.5px; font-weight: 600; line-height: 1.3; overflow-wrap: break-word; overflow-wrap: anywhere; }
+  .tile .a { font-size: 12px; color: var(--muted); margin-top: -3px; overflow-wrap: break-word; overflow-wrap: anywhere; }
   .tile:active { transform: scale(.97); }
   @media (min-width: 560px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
@@ -172,7 +176,7 @@
   button.tag:active { transform: scale(.96); }
   .desc { white-space: pre-wrap; font-size: 14.5px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; margin-bottom: 6px; max-height: 9.6em; overflow: hidden; position: relative; }
   .desc.open { max-height: none; }
-  .desc:not(.open)::after { content: ""; position: absolute; inset: auto 0 0 0; height: 2.6em; background: linear-gradient(transparent, var(--card)); }
+  .desc:not(.open)::after { content: ""; position: absolute; top: auto; right: 0; bottom: 0; left: 0; height: 2.6em; background: linear-gradient(transparent, var(--card)); }
   .more { border: 0; background: none; color: var(--accent); font-weight: 600; padding: 4px 2px 10px; font-size: 14px; }
   .go { width: 100%; margin: 6px 0 18px; }
   .sec { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; margin: 4px 4px 8px; display: flex; justify-content: space-between; }
@@ -188,10 +192,10 @@
 
   /* ===== Trang đọc ===== */
   body.reading-mode { background: var(--read-bg); }
-  .rtop { position: fixed; top: 0; left: 0; right: 0; z-index: 5; display: flex; align-items: center; gap: 4px; padding: calc(var(--safe-t) + 4px) 8px 6px; background: color-mix(in srgb, var(--read-bg) 90%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); transition: transform .22s ease; }
+  .rtop { position: fixed; top: 0; left: 0; right: 0; z-index: 5; display: flex; align-items: center; gap: 4px; padding: calc(var(--safe-t) + 4px) 8px 6px; background: var(--read-bg); background: color-mix(in srgb, var(--read-bg) 90%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); transition: transform .22s ease; }
   .rtop.hide { transform: translateY(-110%); }
   .rtop .rt { flex: 1; min-width: 0; text-align: center; line-height: 1.25; }
-  .rtop .rt b { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: 13.5px; font-weight: 650; overflow: hidden; overflow-wrap: anywhere; }
+  .rtop .rt b { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: 13.5px; font-weight: 650; overflow: hidden; overflow-wrap: break-word; overflow-wrap: anywhere; }
   .rtop .rt small { display: block; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .rtop .ib { color: var(--text); }
   .page { max-width: 700px; margin: 0 auto; padding: calc(var(--safe-t) + 72px) var(--pad) 26px; color: var(--read-text); font-family: var(--rfont); font-size: var(--fs); line-height: var(--lh); text-align: var(--align); overflow-wrap: break-word; hyphens: auto; -webkit-hyphens: auto; }
@@ -209,7 +213,7 @@
   .prog i { display: block; height: 100%; background: var(--accent); width: 0; }
 
   /* ===== Bảng trượt (Aa, mục lục) ===== */
-  .sheet-bg { position: fixed; inset: 0; background: rgb(0 0 0 / .35); z-index: 20; animation: fade .15s; }
+  .sheet-bg { position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: rgb(0 0 0 / .35); z-index: 20; animation: fade .15s; }
   .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; background: var(--card); border-radius: 22px 22px 0 0; padding: 8px 16px calc(var(--safe-b) + 16px); max-height: 82vh; overflow: auto; animation: up .2s ease-out; max-width: 720px; margin: 0 auto; box-shadow: 0 -8px 30px rgb(0 0 0 / .15); }
   .sheet .grip { width: 40px; height: 5px; border-radius: 5px; background: var(--line); margin: 0 auto 10px; }
   .sheet h3 { margin: 2px 0 10px; font-size: 18px; display: flex; align-items: center; justify-content: space-between; }
@@ -244,13 +248,13 @@
   .sw.on { color: var(--text); font-weight: 650; }
   .dots { display: flex; gap: 12px; flex-wrap: wrap; }
   .dot { width: 34px; height: 34px; border-radius: 50%; border: 0; padding: 0; position: relative; }
-  .dot.on::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2.5px solid var(--text); }
+  .dot.on::after { content: ""; position: absolute; top: -5px; right: -5px; bottom: -5px; left: -5px; border-radius: 50%; border: 2.5px solid var(--text); }
   input[type=range] { width: 100%; accent-color: var(--accent); height: 28px; margin: 0; }
   .range { display: flex; align-items: center; gap: 10px; }
   .range span { color: var(--muted); font-size: 13px; flex: none; }
   .switch { position: relative; width: 51px; height: 31px; flex: none; }
-  .switch input { opacity: 0; width: 100%; height: 100%; margin: 0; position: absolute; inset: 0; z-index: 1; cursor: pointer; }
-  .switch i { position: absolute; inset: 0; border-radius: 31px; background: var(--field); border: 1px solid var(--line); transition: background .2s; }
+  .switch input { opacity: 0; width: 100%; height: 100%; margin: 0; position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 1; cursor: pointer; }
+  .switch i { position: absolute; top: 0; right: 0; bottom: 0; left: 0; border-radius: 31px; background: var(--field); border: 1px solid var(--line); transition: background .2s; }
   .switch i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 25px; height: 25px; border-radius: 50%; background: #fff; box-shadow: 0 2px 5px rgb(0 0 0 / .25); transition: transform .2s; }
   .switch input:checked + i { background: #34c759; border-color: #34c759; }
   .switch input:checked + i::after { transform: translateX(20px); }
@@ -266,7 +270,7 @@
   .toast { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 22px); transform: translateX(-50%); z-index: 30; background: var(--text); color: var(--bg); padding: 11px 16px; border-radius: 14px; font-size: 14px; width: max-content; max-width: calc(100% - 32px); box-shadow: 0 8px 24px rgb(0 0 0 / .22); animation: up .2s ease-out; display: flex; align-items: center; gap: 12px; }
   .toast.err { background: var(--err); color: #fff; }
   .toast button { border: 0; background: var(--accent); color: var(--on-accent); border-radius: 9px; padding: 6px 12px; font-weight: 650; font-size: 14px; flex: none; }
-  .busy { position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / .35); display: grid; place-items: center; }
+  .busy { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 40; background: rgb(0 0 0 / .35); display: grid; place-items: center; }
   .busy div { background: var(--card); padding: 18px 22px; border-radius: 16px; font-weight: 600; display: flex; gap: 10px; align-items: center; }
   .spin { width: 18px; height: 18px; border: 2.5px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -275,7 +279,7 @@
   @keyframes fade { from { opacity: 0; } }
 
   /* ===== Thanh dưới (Tủ sách / Yêu thích / Viết / Cài đặt) ===== */
-  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 8; display: flex; justify-content: center; background: color-mix(in srgb, var(--card) 88%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-top: 1px solid var(--line); padding: 5px 6px calc(var(--safe-b) + 4px); }
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 8; display: flex; justify-content: center; background: var(--card); background: color-mix(in srgb, var(--card) 88%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-top: 1px solid var(--line); padding: 5px 6px calc(var(--safe-b) + 4px); }
   .tabbar > div { display: flex; width: 100%; max-width: 520px; }
   .tabbar button { flex: 1; min-width: 0; border: 0; background: none; color: var(--muted); display: grid; justify-items: center; gap: 2px; padding: 4px 2px; font-size: 11px; font-weight: 600; letter-spacing: .01em; }
   .tabbar button svg { width: 24px; height: 24px; transition: transform .15s; }
@@ -299,7 +303,7 @@
   .tile .cover .heart { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: rgb(255 255 255 / .85); display: grid; place-items: center; }
   .del-zone { margin-top: 26px; display: grid; gap: 6px; }
   .del-zone small { color: var(--muted); font-size: 12.5px; text-align: center; }
-  .fav-empty .big { background: color-mix(in srgb, #e0446a 14%, var(--card)); color: #e0446a; }
+  .fav-empty .big { background: var(--field); background: color-mix(in srgb, #e0446a 14%, var(--card)); color: #e0446a; }
 
   /* Nhập kho: chọn Bỏ qua / Thay / Tạo mới cho truyện trùng */
   .imp-row { display: grid; gap: 8px; }
@@ -314,7 +318,7 @@
   .draft .ic { width: 42px; height: 42px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex: none; }
   .draft .ic svg { width: 21px; height: 21px; }
   .draft .lbl { flex: 1; min-width: 0; }
-  .draft .lbl b { display: block; font-size: 16px; line-height: 1.3; overflow-wrap: anywhere; }
+  .draft .lbl b { display: block; font-size: 16px; line-height: 1.3; overflow-wrap: break-word; overflow-wrap: anywhere; }
   .draft .lbl small { color: var(--muted); font-size: 12.5px; }
   .draft > svg { color: var(--muted); width: 18px; height: 18px; }
   .row-btns { display: flex; gap: 8px; margin: 0 0 14px; }
@@ -336,6 +340,14 @@
   .ed-meta { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin: 8px 4px 0; font-variant-numeric: tabular-nums; }
   .note { font-size: 13px; color: var(--muted); background: var(--card); border: 1px dashed var(--line); border-radius: 14px; padding: 10px 12px; line-height: 1.5; margin-top: 14px; }
   .note b { color: var(--text); }
+  /* Máy cũ chưa có aspect-ratio (iOS dưới 15): đặt sẵn chiều cao bìa / ô màu */
+  @supports not (aspect-ratio: 1) {
+    .cover { height: 96px; }
+    .story-head .cover { height: 162px; }
+    .tile .cover { height: calc((100vw - 56px) / 2); }
+    @media (min-width: 560px) { .tile .cover { height: calc((min(100vw, 720px) - 68px) * .375); } }
+    .sw i { height: 46px; }
+  }
 </style>
 </head>
 <body>
@@ -370,7 +382,7 @@
 'use strict';
 /* Đọc truyện: web app chỉ đọc. Truyện nằm trong máy (IndexedDB), nhập từ file .wmkho xuất ở app TienIchWM (📱 Xuất kho).
    Nhập kho: so với tủ sách đang có, hiện truyện mới / có bản mới hơn / trùng y hệt để chọn rồi mới lưu (một giao dịch: lỗi giữa chừng thì không đổi gì), chỗ đang đọc vẫn giữ. */
-const APP_VERSION = '3.0.2 · 26/11/2026';
+const APP_VERSION = '3.0.3 · 26/11/2026';
 const FORMAT = 'TienIchWM-kho';
 const $app = document.getElementById('app'), $file = document.getElementById('file');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -426,7 +438,8 @@ applyPrefs();
 /* ===== IndexedDB ===== */
 let dbp = null;
 function db() {
-  return dbp ??= new Promise((ok, bad) => {
+  if (dbp) return dbp;
+  return dbp = new Promise((ok, bad) => {
     const r = indexedDB.open('doc-truyen', 2); // bản 2: thêm “drafts” (bản nháp viết trên điện thoại)
     r.onupgradeneeded = () => {
       const d = r.result;
@@ -458,13 +471,133 @@ async function load() {
 }
 const story = id => S.stories.find(s => s.id === id);
 
+/* ===== Máy cũ (iOS dưới 14.1) chưa có gap cho flex: thêm lề cho phần tử con thay thế ===== */
+(function flexGapFallback() {
+  const t = document.createElement('div');
+  t.style.cssText = 'display:flex;flex-direction:column;row-gap:1px;position:absolute;visibility:hidden';
+  t.appendChild(document.createElement('div')); t.appendChild(document.createElement('div'));
+  document.body.appendChild(t);
+  const ok = t.scrollHeight === 1;
+  t.remove();
+  if (ok) return;
+  const fix = () => {
+    for (const el of document.body.querySelectorAll('div, span, button, label, a, nav, header, section, form')) {
+      const cs = getComputedStyle(el);
+      if (cs.display !== 'flex' && cs.display !== 'inline-flex') continue;
+      const cg = parseFloat(cs.columnGap) || 0, rg = parseFloat(cs.rowGap) || 0;
+      if (!cg && !rg) continue;
+      const col = cs.flexDirection.startsWith('column'), wrap = cs.flexWrap !== 'nowrap';
+      const kids = [...el.children].filter(k => { const c = getComputedStyle(k); return c.position !== 'absolute' && c.position !== 'fixed' && c.display !== 'none'; });
+      kids.forEach((k, i) => {
+        const last = i === kids.length - 1;
+        if (col) { if (!last && rg) k.style.marginBottom = rg + 'px'; }
+        else { if (!last && cg) k.style.marginRight = cg + 'px'; if (wrap && rg) k.style.marginBottom = rg + 'px'; }
+      });
+    }
+  };
+  let queued = false;
+  new MutationObserver(() => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; fix(); }); } }).observe(document.body, { childList: true, subtree: true });
+  document.documentElement.classList.add('no-flex-gap');
+  requestAnimationFrame(fix);
+})();
+
 /* ===== Nhập kho ===== */
+// Giải nén gzip bằng JS thuần (máy chưa có DecompressionStream: iOS dưới 16.4). Theo cách của puff.c (zlib), chậm hơn bản có sẵn nhưng đủ dùng.
+function gunzipBytes(src) {
+  const bad = () => { throw new Error('File kho bị hỏng, không giải nén được'); };
+  if (src[0] !== 0x1f || src[1] !== 0x8b || src[2] !== 8) bad();
+  const flg = src[3];
+  let pos = 10;
+  if (flg & 4) pos += 2 + (src[pos] | src[pos + 1] << 8);
+  if (flg & 8) { while (src[pos++]) {} }
+  if (flg & 16) { while (src[pos++]) {} }
+  if (flg & 2) pos += 2;
+  let bit = 0, cnt = 0, out = new Uint8Array(Math.max(1 << 16, src.length * 5)), len = 0;
+  const need = n => { if (len + n > out.length) { let m = out.length * 2; while (m < len + n) m *= 2; const o = new Uint8Array(m); o.set(out.subarray(0, len)); out = o; } };
+  const bits = n => {
+    while (cnt < n) { if (pos >= src.length) bad(); bit |= src[pos++] << cnt; cnt += 8; }
+    const v = bit & ((1 << n) - 1); bit >>>= n; cnt -= n; return v;
+  };
+  const build = (lens, n) => {
+    const count = new Uint16Array(16), offs = new Uint16Array(16), sym = new Uint16Array(n);
+    for (let i = 0; i < n; i++) count[lens[i]]++;
+    count[0] = 0;
+    for (let i = 1; i < 16; i++) offs[i] = offs[i - 1] + count[i - 1];
+    for (let i = 0; i < n; i++) if (lens[i]) sym[offs[lens[i]]++] = i;
+    return { count, sym };
+  };
+  const decode = h => {
+    let code = 0, first = 0, index = 0;
+    for (let l = 1; l < 16; l++) {
+      code |= bits(1);
+      const c = h.count[l];
+      if (code - c < first) return h.sym[index + (code - first)];
+      index += c; first = (first + c) << 1; code <<= 1;
+    }
+    bad();
+  };
+  const LB = [3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258];
+  const LE = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0];
+  const DB = [1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577];
+  const DE = [0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13];
+  let fixed = null;
+  const ORDER = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15];
+  for (let last = 0; !last;) {
+    last = bits(1);
+    const type = bits(2);
+    if (type === 0) {
+      bit = 0; cnt = 0;
+      if (pos + 4 > src.length) bad();
+      const n = src[pos] | src[pos + 1] << 8; pos += 4;
+      if (pos + n > src.length) bad();
+      need(n); out.set(src.subarray(pos, pos + n), len); len += n; pos += n;
+      continue;
+    }
+    let lit, dist;
+    if (type === 1) {
+      if (!fixed) {
+        const l = new Uint8Array(320);
+        for (let i = 0; i < 288; i++) l[i] = i < 144 ? 8 : i < 256 ? 9 : i < 280 ? 7 : 8;
+        for (let i = 288; i < 320; i++) l[i] = 5;
+        fixed = [build(l, 288), build(l.subarray(288), 30)];
+      }
+      [lit, dist] = fixed;
+    } else if (type === 2) {
+      const nlen = bits(5) + 257, ndist = bits(5) + 1, ncode = bits(4) + 4;
+      const cl = new Uint8Array(19);
+      for (let i = 0; i < ncode; i++) cl[ORDER[i]] = bits(3);
+      const ch = build(cl, 19), l = new Uint8Array(nlen + ndist);
+      for (let i = 0; i < nlen + ndist;) {
+        const s = decode(ch);
+        if (s < 16) { l[i++] = s; continue; }
+        let v = 0, r;
+        if (s === 16) { if (!i) bad(); v = l[i - 1]; r = 3 + bits(2); } else if (s === 17) r = 3 + bits(3); else r = 11 + bits(7);
+        if (i + r > nlen + ndist) bad();
+        while (r--) l[i++] = v;
+      }
+      lit = build(l, nlen); dist = build(l.subarray(nlen), ndist);
+    } else bad();
+    for (;;) {
+      let s = decode(lit);
+      if (s < 256) { need(1); out[len++] = s; continue; }
+      if (s === 256) break;
+      s -= 257; if (s >= 29) bad();
+      const n = LB[s] + bits(LE[s]);
+      const d = decode(dist); if (d >= 30) bad();
+      const back = DB[d] + bits(DE[d]);
+      if (back > len) bad();
+      need(n);
+      for (let i = 0; i < n; i++, len++) out[len] = out[len - back];
+    }
+  }
+  return out.subarray(0, len);
+}
 async function readKho(file) {
-  const buf = await file.arrayBuffer(), b = new Uint8Array(buf, 0, Math.min(2, buf.byteLength));
+  const buf = await new Response(file).arrayBuffer(), b = new Uint8Array(buf, 0, Math.min(2, buf.byteLength)); // file.arrayBuffer() chỉ có từ iOS 14
   let text;
   if (b[0] === 0x1f && b[1] === 0x8b) {
-    if (typeof DecompressionStream === 'undefined') throw new Error('Trình duyệt này cũ quá, không giải nén được file kho. Cập nhật iOS (16.4 trở lên) hoặc Chrome trên Android rồi thử lại nhé');
-    text = await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+    if (typeof DecompressionStream !== 'undefined') text = await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+    else text = new TextDecoder().decode(gunzipBytes(new Uint8Array(buf))); // iOS dưới 16.4: giải nén bằng JS
   } else text = new TextDecoder().decode(buf);
   let kho;
   try { kho = JSON.parse(text); } catch { throw new Error('File không đọc được. Chọn đúng file .wmkho xuất từ app TienIchWM nhé'); }
@@ -490,7 +623,7 @@ function compareKho(kho) {
     const lk = linkKey(s.link), nk = nameKey(s);
     let old = byId.get(String(s.id));
     if (old && used.has(old.id)) old = null;
-    old ??= S.stories.find(o => !used.has(o.id) && ((lk && linkKey(o.link) === lk) || nameKey(o) === nk)) || null;
+    if (old == null) old = S.stories.find(o => !used.has(o.id) && ((lk && linkKey(o.link) === lk) || nameKey(o) === nk)) || null;
     if (old) used.add(old.id);
     const chs = (s.chapters || []).filter(c => c && c.id);
     let kind = 'new', note = '';
@@ -1270,7 +1403,7 @@ function hashOf(st) {
 function go(state, replace) {
   if (S.view === 'read') savePos(true);
   if (state.view === 'settings') { state.sid = S.sid; state.cid = S.cid; state.from = S.view; }
-  if (state.view === 'chap' || state.view === 'draft') state.did ??= S.did;
+  if (state.view === 'chap' || state.view === 'draft') state.did = state.did ?? S.did;
   Object.assign(S, state);
   history[replace ? 'replaceState' : 'pushState']({ view: state.view, sid: state.sid ?? null, cid: state.cid ?? null, did: state.did ?? null, chid: state.chid ?? null, from: state.from ?? null }, '', hashOf(state));
   render();
