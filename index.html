@@ -117,7 +117,7 @@
   .hint .ib { width: 30px; height: 30px; border: 0; background: none; margin: -4px -4px 0 auto; color: var(--muted); }
   .hint .ib svg { width: 18px; height: 18px; }
 
-  /* ===== Tủ truyện: danh sách / lưới ===== */
+  /* ===== Tủ sách: danh sách / lưới ===== */
   .list { display: grid; gap: 10px; }
   .card { display: flex; gap: 13px; align-items: stretch; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--card); border-radius: 18px; padding: 10px; color: var(--text); }
   .card:active { transform: scale(.99); }
@@ -272,6 +272,69 @@
   @keyframes up { from { transform: translate(var(--tx, 0), 30px); opacity: 0; } }
   .toast { --tx: -50%; }
   @keyframes fade { from { opacity: 0; } }
+
+  /* ===== Thanh dưới (Tủ sách / Yêu thích / Viết / Cài đặt) ===== */
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 8; display: flex; justify-content: center; background: color-mix(in srgb, var(--card) 88%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-top: 1px solid var(--line); padding: 5px 6px calc(var(--safe-b) + 4px); }
+  .tabbar > div { display: flex; width: 100%; max-width: 520px; }
+  .tabbar button { flex: 1; min-width: 0; border: 0; background: none; color: var(--muted); display: grid; justify-items: center; gap: 2px; padding: 4px 2px; font-size: 11px; font-weight: 600; letter-spacing: .01em; }
+  .tabbar button svg { width: 24px; height: 24px; transition: transform .15s; }
+  .tabbar button .pill { display: grid; place-items: center; width: 52px; height: 30px; border-radius: 999px; transition: background .15s; }
+  .tabbar button.on { color: var(--accent); }
+  .tabbar button.on .pill { background: var(--accent-soft); }
+  .tabbar button.on svg { transform: scale(1.06); }
+  .tabbar button.on[data-v=favs] svg { fill: currentColor; }
+  .tabbar button:active svg { transform: scale(.9); }
+  .tabbar .pill { position: relative; }
+  .tabbar .badge { position: absolute; top: -4px; right: 2px; min-width: 17px; height: 17px; border-radius: 9px; padding: 0 4px; background: var(--accent); color: var(--on-accent); font-size: 10.5px; line-height: 17px; font-variant-numeric: tabular-nums; }
+  body.has-tabs .wrap { padding-bottom: calc(var(--safe-b) + 96px); }
+  body.has-tabs .toast { bottom: calc(var(--safe-b) + 82px); }
+  body.has-tabs .tag-foot { bottom: calc(-16px - var(--safe-b)); }
+
+  /* Yêu thích, xoá truyện */
+  .ib.fav.on { color: #e0446a; border-color: color-mix(in srgb, #e0446a 40%, var(--line)); }
+  .ib.fav.on svg { fill: currentColor; }
+  .heart { color: #e0446a; display: inline-flex; vertical-align: -2px; }
+  .heart svg { width: 14px; height: 14px; fill: currentColor; stroke-width: 1.5; }
+  .tile .cover .heart { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: rgb(255 255 255 / .85); display: grid; place-items: center; }
+  .del-zone { margin-top: 26px; display: grid; gap: 6px; }
+  .del-zone small { color: var(--muted); font-size: 12.5px; text-align: center; }
+  .fav-empty .big { background: color-mix(in srgb, #e0446a 14%, var(--card)); color: #e0446a; }
+
+  /* Nhập kho: chọn Bỏ qua / Thay / Tạo mới cho truyện trùng */
+  .imp-row { display: grid; gap: 8px; }
+  .imp-row .seg button { padding: 6px 4px; font-size: 13px; }
+  .imp-row .seg button.on[data-m=copy] { color: var(--accent); }
+  .imp-h .mini-seg { display: flex; gap: 4px; flex: none; }
+  .imp-h .mini-seg button { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 3px 7px; font-size: 12px; font-weight: 600; color: var(--accent); }
+
+  /* ===== Viết truyện (bản nháp) ===== */
+  .draft-list { display: grid; gap: 10px; }
+  .draft { display: flex; gap: 12px; align-items: center; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--card); border-radius: 16px; padding: 12px 14px; color: var(--text); }
+  .draft .ic { width: 42px; height: 42px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex: none; }
+  .draft .ic svg { width: 21px; height: 21px; }
+  .draft .lbl { flex: 1; min-width: 0; }
+  .draft .lbl b { display: block; font-size: 16px; line-height: 1.3; overflow-wrap: anywhere; }
+  .draft .lbl small { color: var(--muted); font-size: 12.5px; }
+  .draft > svg { color: var(--muted); width: 18px; height: 18px; }
+  .row-btns { display: flex; gap: 8px; margin: 0 0 14px; }
+  .row-btns .btn { flex: 1; min-width: 0; min-height: 46px; padding: 0 12px; font-size: 15px; }
+  .form { display: grid; gap: 12px; }
+  .form label { display: grid; gap: 5px; font-size: 13px; font-weight: 650; color: var(--muted); }
+  .form input, .form textarea, .ed-title, .ed-text { width: 100%; border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 12px; padding: 10px 12px; font: 16px/1.45 var(--font); -webkit-appearance: none; appearance: none; }
+  .form textarea { min-height: 96px; resize: vertical; }
+  .form input:focus, .form textarea:focus, .ed-title:focus, .ed-text:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .saved { font-size: 12px; color: var(--muted); font-weight: 500; text-align: center; }
+  .saved.busy-s { color: var(--accent); }
+  .chs-ed .ch { gap: 6px; padding-right: 6px; }
+  .chs-ed .ch .ib { width: 34px; height: 34px; border-radius: 10px; border: 0; background: none; color: var(--muted); }
+  .chs-ed .ch .ib svg { width: 18px; height: 18px; }
+  .chs-ed .ch .ib:disabled { opacity: .3; }
+  .chs-ed .open-ch { flex: 1; min-width: 0; display: flex; gap: 10px; align-items: center; border: 0; background: none; text-align: left; padding: 0; color: var(--text); }
+  .ed-title { font-weight: 650; font-size: 18px; margin-bottom: 10px; }
+  .ed-text { min-height: 62vh; resize: none; font-family: var(--rfont); font-size: 18px; line-height: 1.7; padding: 14px; }
+  .ed-meta { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin: 8px 4px 0; font-variant-numeric: tabular-nums; }
+  .note { font-size: 13px; color: var(--muted); background: var(--card); border: 1px dashed var(--line); border-radius: 14px; padding: 10px 12px; line-height: 1.5; margin-top: 14px; }
+  .note b { color: var(--text); }
 </style>
 </head>
 <body>
@@ -292,14 +355,21 @@
   <symbol id="i-filter" viewBox="0 0 24 24"><path d="M3 5h18l-7 8.5V19l-4 2v-7.5z"/></symbol>
   <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
   <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7.5 7.5 4.5-4.5 4.5 4.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.3-9.4C1.4 7.6 3.6 4 7.2 4c2 0 3.6 1.1 4.8 2.8C13.2 5.1 14.8 4 16.8 4c3.6 0 5.8 3.6 4.5 7.1-1.8 4.8-9.3 9.4-9.3 9.4z"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></symbol>
 </svg>
 <div id="app"></div>
 <input type="file" id="file" hidden>
 <script>
 'use strict';
 /* Đọc truyện: web app chỉ đọc. Truyện nằm trong máy (IndexedDB), nhập từ file .wmkho xuất ở app TienIchWM (📱 Xuất kho).
-   Nhập kho: so với tủ truyện đang có, hiện truyện mới / có bản mới hơn / trùng y hệt để chọn rồi mới lưu (một giao dịch: lỗi giữa chừng thì không đổi gì), chỗ đang đọc vẫn giữ. */
-const APP_VERSION = '2.5 · 25/11/2026';
+   Nhập kho: so với tủ sách đang có, hiện truyện mới / có bản mới hơn / trùng y hệt để chọn rồi mới lưu (một giao dịch: lỗi giữa chừng thì không đổi gì), chỗ đang đọc vẫn giữ. */
+const APP_VERSION = '3.0 · 26/11/2026';
 const FORMAT = 'TienIchWM-kho';
 const $app = document.getElementById('app'), $file = document.getElementById('file');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -356,10 +426,10 @@ applyPrefs();
 let dbp = null;
 function db() {
   return dbp ??= new Promise((ok, bad) => {
-    const r = indexedDB.open('doc-truyen', 1);
+    const r = indexedDB.open('doc-truyen', 2); // bản 2: thêm “drafts” (bản nháp viết trên điện thoại)
     r.onupgradeneeded = () => {
       const d = r.result;
-      for (const [n, k] of [['stories', 'id'], ['pos', 'id']]) if (!d.objectStoreNames.contains(n)) d.createObjectStore(n, { keyPath: k });
+      for (const [n, k] of [['stories', 'id'], ['pos', 'id'], ['drafts', 'id']]) if (!d.objectStoreNames.contains(n)) d.createObjectStore(n, { keyPath: k });
       for (const n of ['texts', 'images', 'meta']) if (!d.objectStoreNames.contains(n)) d.createObjectStore(n);
     };
     r.onsuccess = () => ok(r.result);
@@ -373,12 +443,14 @@ async function put(store, value, key) { const d = await db(); const tx = d.trans
 const done = tx => new Promise((ok, bad) => { tx.oncomplete = () => ok(); tx.onerror = () => bad(tx.error); tx.onabort = () => bad(tx.error || new Error('Bị huỷ')); });
 
 /* ===== Trạng thái ===== */
-const S = { stories: [], pos: new Map(), meta: null, view: 'list', sid: null, cid: null, q: '', tags: [], tagq: '' };
+const S = { stories: [], pos: new Map(), meta: null, view: 'list', sid: null, cid: null, q: '', tags: [], tagq: '', favs: new Set(), drafts: [], did: null, chid: null };
 // So khớp không dấu: “dam my” tìm được “Đam mỹ”
 const plain = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
 async function load() {
-  const [stories, pos, meta, saved] = await Promise.all([all('stories'), all('pos'), get('meta', 'info'), get('meta', 'prefs')]);
+  const [stories, pos, meta, saved, favs, drafts] = await Promise.all([all('stories'), all('pos'), get('meta', 'info'), get('meta', 'prefs'), get('meta', 'favs'), all('drafts')]);
   S.stories = stories.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  S.favs = new Set((Array.isArray(favs) ? favs : []).filter(id => stories.some(s => s.id === id)));
+  S.drafts = drafts.sort((a, b) => (b.updated || '').localeCompare(a.updated || ''));
   S.pos = new Map(pos.map(p => [p.id, p]));
   S.meta = meta || null;
   if (saved) { prefs = clean(saved); applyPrefs(); try { localStorage.setItem('doc-prefs', JSON.stringify(prefs)); } catch {} }
@@ -429,7 +501,7 @@ function compareKho(kho) {
       if (same) kind = 'same';
       else { kind = 'upd'; note = add > 0 ? `+${num(add)} chương mới` : add < 0 ? `ít hơn bản trên điện thoại ${num(-add)} chương` : 'nội dung / thông tin có thay đổi'; }
     }
-    rows.push({ i, s, chs, old, kind, note, on: kind !== 'same' });
+    rows.push({ i, s, chs, old, kind, note, mode: kind === 'new' ? 'add' : kind === 'upd' ? 'replace' : 'skip' });
   });
   return { rows, extra: S.stories.filter(s => !used.has(s.id)) };
 }
@@ -444,7 +516,10 @@ async function importKho(file) {
   if (!S.stories.length) return applyImport(); // tủ đang trống: nhập luôn, không cần hỏi
   importSheet();
 }
-const KINDS = [['new', 'Truyện mới', 'Chưa có trên điện thoại'], ['upd', 'Có bản mới hơn', 'Đã có, bật thì thay bằng bản trong file (chỗ đang đọc vẫn giữ)'], ['same', 'Trùng y hệt', 'Giống hệt bản trên điện thoại, mặc định bỏ qua']];
+// Mỗi truyện trong file: mode = 'add' (truyện mới) | 'replace' (thay bản trên máy) | 'copy' (giữ bản cũ, thêm bản mới riêng) | 'skip'
+const KINDS = [['new', 'Truyện mới', 'Chưa có trên điện thoại'], ['upd', 'Có bản mới hơn', 'Đã có trên điện thoại, chọn cách nhập cho từng truyện'], ['same', 'Trùng y hệt', 'Giống hệt bản trên điện thoại, mặc định bỏ qua']];
+const MODES = [['skip', 'Bỏ qua'], ['replace', 'Thay bản cũ'], ['copy', 'Tạo mới']];
+const modeSeg = r => `<div class="seg" data-mode-row="${r.i}">${MODES.map(([m, l]) => `<button type="button" class="${r.mode === m ? 'on' : ''}" data-act="imp-mode" data-i="${r.i}" data-m="${m}">${l}</button>`).join('')}</div>`;
 function importSheet() {
   const p = pending, c = k => p.rows.filter(r => r.kind === k).length;
   openSheet(`<h3>Nhập kho<span class="imp-file">${esc(p.file.name)}</span></h3>
@@ -452,9 +527,15 @@ function importSheet() {
     ${KINDS.map(([k, l, sub]) => {
       const list = p.rows.filter(r => r.kind === k);
       if (!list.length) return '';
-      return `<div class="imp-h"><span><b>${l} (${num(list.length)})</b><small>${sub}</small></span>${list.length > 1 ? `<button class="link" data-act="pick-all" data-k="${k}">${list.every(r => r.on) ? 'Bỏ hết' : 'Chọn hết'}</button>` : ''}</div>
-        <div class="group">${list.map(r => `<label class="item"><span class="lbl">${esc(r.s.title || 'Truyện')}<small>${[r.s.author, num(r.chs.length) + ' chương', r.note].filter(Boolean).map(esc).join(' · ')}</small></span><span class="switch"><input type="checkbox" data-pick="${r.i}"${r.on ? ' checked' : ''}><i></i></span></label>`).join('')}</div>`;
+      const meta = r => `<small>${[r.s.author, num(r.chs.length) + ' chương', r.note].filter(Boolean).map(esc).join(' · ')}</small>`;
+      const head = `<div class="imp-h"><span><b>${l} (${num(list.length)})</b><small>${sub}</small></span>${list.length > 1 ? (k === 'new'
+        ? `<button class="link" data-act="pick-all" data-k="${k}">${list.every(r => r.mode !== 'skip') ? 'Bỏ hết' : 'Chọn hết'}</button>`
+        : `<span class="mini-seg"><span style="font-size:12px;color:var(--muted);align-self:center">Tất cả:</span>${MODES.map(([m, ml]) => `<button type="button" data-act="mode-all" data-k="${k}" data-m="${m}">${ml.replace(' bản cũ', '')}</button>`).join('')}</span>`) : ''}</div>`;
+      return head + `<div class="group">${list.map(r => k === 'new'
+        ? `<label class="item"><span class="lbl">${esc(r.s.title || 'Truyện')}${meta(r)}</span><span class="switch"><input type="checkbox" data-pick="${r.i}"${r.mode !== 'skip' ? ' checked' : ''}><i></i></span></label>`
+        : `<div class="item imp-row"><span class="lbl">${esc(r.s.title || 'Truyện')}${meta(r)}</span>${modeSeg(r)}</div>`).join('')}</div>`;
     }).join('')}
+    ${p.rows.some(r => r.old) ? `<div class="group-f" style="margin:8px 6px 0">“Tạo mới”: giữ nguyên truyện đang có, thêm bản trong file thành một truyện riêng (tên thêm “(2)”).</div>` : ''}
     ${p.extra.length ? `<div class="imp-h"><span><b>Chỉ có trên điện thoại (${num(p.extra.length)})</b><small>Không có trong file này, mặc định vẫn giữ</small></span></div>
       <div class="group"><div class="item stack imp-extra">${p.extra.slice(0, 30).map(s => `<span>${esc(s.title)}</span>`).join('')}${p.extra.length > 30 ? `<span>… và ${num(p.extra.length - 30)} truyện khác</span>` : ''}</div>
       <label class="item"><span class="lbl">Xoá các truyện này<small>Bật nếu muốn điện thoại giống hệt kho trong file</small></span><span class="switch"><input type="checkbox" data-drop${p.drop ? ' checked' : ''}><i></i></span></label></div>` : ''}
@@ -462,21 +543,31 @@ function importSheet() {
       <div class="row2"><button class="btn" data-act="imp-cancel">Huỷ</button><button class="btn primary" data-act="imp-go">Nhập</button></div></div>`);
 }
 function importSum() {
-  const p = pending, on = p.rows.filter(r => r.on);
-  const add = on.filter(r => !r.old).length, upd = on.length - add, del = p.drop ? p.extra.length : 0;
-  const parts = [add && `thêm <b>${num(add)}</b> truyện`, upd && `thay <b>${num(upd)}</b> truyện bằng bản trong file`, del && `xoá <b>${num(del)}</b> truyện`].filter(Boolean);
+  const p = pending, cnt = m => p.rows.filter(r => r.mode === m).length;
+  const add = cnt('add'), upd = cnt('replace'), copy = cnt('copy'), del = p.drop ? p.extra.length : 0;
+  const parts = [add && `thêm <b>${num(add)}</b> truyện`, upd && `thay <b>${num(upd)}</b> truyện bằng bản trong file`, copy && `tạo <b>${num(copy)}</b> truyện mới từ bản trùng`, del && `xoá <b>${num(del)}</b> truyện`].filter(Boolean);
   return parts.length ? 'Sẽ ' + parts.join(', ') : 'Chưa chọn truyện nào, nhập sẽ không thay đổi gì';
 }
 function refreshImportSheet() {
   const x = document.querySelector('[data-imp-sum]'); if (x) x.innerHTML = importSum();
-  document.querySelectorAll('.sheet [data-act=pick-all]').forEach(b => { b.textContent = pending.rows.filter(r => r.kind === b.dataset.k).every(r => r.on) ? 'Bỏ hết' : 'Chọn hết'; });
+  document.querySelectorAll('.sheet [data-act=pick-all]').forEach(b => { b.textContent = pending.rows.filter(r => r.kind === b.dataset.k).every(r => r.mode !== 'skip') ? 'Bỏ hết' : 'Chọn hết'; });
+  for (const r of pending.rows) {
+    document.querySelectorAll(`.sheet [data-mode-row="${r.i}"] button`).forEach(b => b.classList.toggle('on', b.dataset.m === r.mode));
+    const c = document.querySelector(`.sheet [data-pick="${r.i}"]`); if (c) c.checked = r.mode !== 'skip';
+  }
+}
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+// Tên cho bản “Tạo mới”: thêm (2), (3)… cho khỏi lẫn với truyện đang có
+function copyTitle(t, taken) {
+  const base = String(t || 'Truyện').replace(/\s*\(\d+\)$/, '');
+  for (let n = 2; ; n++) { const x = `${base} (${n})`; if (!taken.has(plain(x))) { taken.add(plain(x)); return x; } }
 }
 async function applyImport() {
   const { kho, file, rows, extra, drop } = pending;
   pending = null;
-  const on = rows.filter(r => r.on), del = drop ? extra : [];
+  const on = rows.filter(r => r.mode !== 'skip'), del = drop ? extra : [];
   closeSheet();
-  if (!on.length && !del.length) { toast('Không có gì thay đổi, tủ truyện giữ nguyên'); return; }
+  if (!on.length && !del.length) { toast('Không có gì thay đổi, tủ sách giữ nguyên'); return; }
   showBusy('Đang lưu truyện vào máy…');
   try {
     try { await navigator.storage?.persist?.(); } catch {} // xin giữ dữ liệu lâu dài (iOS 17+), không được thì thôi
@@ -484,33 +575,41 @@ async function applyImport() {
     const d = await db();
     const tx = d.transaction(['stories', 'texts', 'images', 'pos', 'meta'], 'readwrite');
     const os = n => tx.objectStore(n);
-    // Cả lần nhập nằm trong một giao dịch: lỗi giữa chừng thì tủ truyện không đổi gì
+    // Cả lần nhập nằm trong một giao dịch: lỗi giữa chừng thì tủ sách không đổi gì
     const dropData = id => { const r = IDBKeyRange.bound(id + '\n', id + '\n￿'); os('texts').delete(r); os('images').delete(r); };
     const removeStory = id => { os('stories').delete(id); dropData(id); };
+    const ids = new Set(S.stories.map(s => s.id)), titles = new Set([...S.stories, ...rows.map(r => r.s)].map(s => plain(s.title)));
+    const favs = new Set(S.favs);
     const final = []; // thứ tự mới: theo file, truyện chỉ có trên điện thoại xếp sau
-    let added = 0, updated = 0;
+    let added = 0, updated = 0, copied = 0;
     for (const r of rows) {
-      if (!r.on) { if (r.old) final.push(r.old); continue; }
-      const s = r.s, id = String(s.id);
-      const meta = { id, title: String(s.title || 'Truyện'), author: String(s.author || ''), link: String(s.link || ''),
+      if (r.mode === 'skip') { if (r.old) final.push(r.old); continue; }
+      if (r.mode === 'copy' && r.old) final.push(r.old); // giữ bản cũ, bản trong file thành truyện riêng
+      const s = r.s, copy = r.mode === 'copy';
+      let id = String(s.id);
+      if (copy || (!r.old && ids.has(id))) { do id = newId(); while (ids.has(id)); }
+      ids.add(id);
+      const meta = { id, title: copy ? copyTitle(s.title, titles) : String(s.title || 'Truyện'), author: String(s.author || ''), link: String(s.link || ''),
         categories: Array.isArray(s.categories) ? s.categories.map(String) : [], description: String(s.description || ''), updated: s.updated || '',
         cover: typeof s.cover === 'string' && s.cover.startsWith('data:image/') ? s.cover : null,
         chapters: r.chs.map(c => ({ id: String(c.id), title: String(c.title || ''), words: Number(c.words) || 0 })), read: s.read || null };
-      if (r.old) { removeStory(r.old.id); updated++; } else { dropData(id); added++; }
+      if (r.mode === 'replace') { removeStory(r.old.id); updated++; if (r.old.id !== id && favs.delete(r.old.id)) favs.add(id); }
+      else { dropData(id); if (copy) copied++; else added++; }
       for (const c of r.chs) os('texts').put(String(c.text || ''), key2(id, String(c.id)));
       for (const [name, url] of Object.entries(s.images || {})) if (typeof url === 'string' && url.startsWith('data:image/')) os('images').put(url, key2(id, name));
       // Chỗ đang đọc: giữ chỗ trên điện thoại nếu chương còn; chưa đọc trên điện thoại thì lấy chỗ đọc trên máy tính
       const has = cid => meta.chapters.some(c => c.id === cid);
-      const old = pos.get(r.old?.id ?? id);
-      if (r.old && r.old.id !== id) os('pos').delete(r.old.id);
+      const old = r.mode === 'replace' ? pos.get(r.old.id) : null;
+      if (r.mode === 'replace' && r.old.id !== id) os('pos').delete(r.old.id);
       if (old && has(old.chapter)) os('pos').put({ ...old, id });
       else if (meta.read?.chapter && has(String(meta.read.chapter))) os('pos').put({ id, chapter: String(meta.read.chapter), offset: Math.min(1, Math.max(0, Number(meta.read.offset) || 0)), at: 0 });
       else os('pos').delete(id);
       final.push(meta);
     }
     for (const s of extra) if (!del.includes(s)) final.push(s);
-    for (const s of del) { removeStory(s.id); os('pos').delete(s.id); }
+    for (const s of del) { removeStory(s.id); os('pos').delete(s.id); favs.delete(s.id); }
     final.forEach((s, i) => os('stories').put({ ...s, order: i }));
+    os('meta').put([...favs], 'favs');
     os('meta').put({ imported: new Date().toISOString(), exported: kho.exported || '', file: file.name, stories: final.length, chapters: final.reduce((a, s) => a + s.chapters.length, 0) }, 'info');
     await done(tx);
     await load();
@@ -518,7 +617,7 @@ async function applyImport() {
     S.view = 'list'; S.sid = S.cid = null; S.tags = []; S.tagq = '';
     history.replaceState({ view: 'list' }, '', location.pathname + location.search);
     render();
-    const msg = [added && `thêm ${num(added)} truyện`, updated && `cập nhật ${num(updated)} truyện`, del.length && `xoá ${num(del.length)} truyện`].filter(Boolean).join(', ');
+    const msg = [added && `thêm ${num(added)} truyện`, updated && `cập nhật ${num(updated)} truyện`, copied && `tạo ${num(copied)} truyện mới từ bản trùng`, del.length && `xoá ${num(del.length)} truyện`].filter(Boolean).join(', ');
     toast(`✓ Đã ${msg}. File trong app Tệp xoá đi được rồi nhé`);
   } catch (e) {
     hideBusy();
@@ -529,11 +628,11 @@ $file.addEventListener('change', () => { const f = $file.files[0]; $file.value =
 const pickFile = () => $file.click();
 
 async function wipe() {
-  if (!confirm('Xoá toàn bộ truyện và chỗ đang đọc trên máy này? (Truyện trên máy tính không bị ảnh hưởng)')) return;
+  if (!confirm('Xoá toàn bộ truyện và chỗ đang đọc trên máy này? (Truyện trên máy tính không bị ảnh hưởng, bản nháp ở mục Viết vẫn giữ)')) return;
   const d = await db();
   const tx = d.transaction(['stories', 'texts', 'images', 'pos', 'meta'], 'readwrite');
-  for (const n of ['stories', 'texts', 'images', 'pos']) tx.objectStore(n).clear();
-  tx.objectStore('meta').delete('info');
+  for (const n of ['stories', 'texts', 'images', 'pos']) tx.objectStore(n).clear(); // bản nháp (Viết) vẫn giữ
+  tx.objectStore('meta').delete('info'); tx.objectStore('meta').delete('favs');
   await done(tx);
   await load();
   S.view = 'list'; history.replaceState({ view: 'list' }, '', location.pathname + location.search); render(); toast('Đã xoá toàn bộ truyện');
@@ -542,6 +641,32 @@ async function resetPos() {
   if (!confirm('Xoá chỗ đang đọc của mọi truyện? Truyện vẫn còn, chỉ bỏ đánh dấu đã đọc tới đâu.')) return;
   const d = await db(); const tx = d.transaction('pos', 'readwrite'); tx.objectStore('pos').clear(); await done(tx);
   await load(); render(); toast('Đã xoá chỗ đang đọc');
+}
+
+async function saveFavs() { await put('meta', [...S.favs], 'favs'); }
+async function toggleFav(id) {
+  const on = !S.favs.has(id);
+  if (on) S.favs.add(id); else S.favs.delete(id);
+  try { await saveFavs(); } catch {}
+  const b = $app.querySelector('[data-act=fav]');
+  if (b) { b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.setAttribute('aria-label', on ? 'Bỏ khỏi Yêu thích' : 'Thêm vào Yêu thích'); }
+  updateTabbar();
+  toast(on ? '♥ Đã thêm vào Yêu thích' : 'Đã bỏ khỏi Yêu thích');
+}
+async function deleteStory(id) {
+  const s = story(id);
+  if (!s || !confirm(`Xoá truyện “${s.title}” khỏi điện thoại?
+
+Xoá cả ${s.chapters.length} chương và chỗ đang đọc. Truyện trên máy tính không bị ảnh hưởng, muốn đọc lại thì nhập kho lại.`)) return;
+  const d = await db();
+  const tx = d.transaction(['stories', 'texts', 'images', 'pos', 'meta'], 'readwrite');
+  const r = IDBKeyRange.bound(id + '\n', id + '\n￿');
+  tx.objectStore('stories').delete(id); tx.objectStore('texts').delete(r); tx.objectStore('images').delete(r); tx.objectStore('pos').delete(id);
+  S.favs.delete(id); tx.objectStore('meta').put([...S.favs], 'favs');
+  await done(tx);
+  await load();
+  toast(`Đã xoá “${s.title}”`);
+  if (history.state?.view === 'story') history.back(); else { S.view = 'list'; render(); }
 }
 
 /* ===== Vẽ giao diện ===== */
@@ -563,11 +688,15 @@ const pct = r => Math.min(100, Math.round(r * 100)) + '%';
 function render() {
   document.body.classList.toggle('reading-mode', S.view === 'read');
   releaseWake();
-  if (S.view === 'settings') return settingsView();
-  if (S.view === 'story' && story(S.sid)) return storyView();
-  if (S.view === 'read' && story(S.sid)) return readView();
-  S.view = 'list';
-  listView();
+  flushDraft();
+  if (S.view === 'settings') settingsView();
+  else if (S.view === 'story' && story(S.sid)) storyView();
+  else if (S.view === 'read' && story(S.sid)) readView();
+  else if (S.view === 'draft' && draft(S.did)) draftView();
+  else if (S.view === 'chap' && draft(S.did)?.chapters.some(c => c.id === S.chid)) chapView();
+  else if (['drafts', 'draft', 'chap'].includes(S.view)) { S.view = 'drafts'; draftsView(); }
+  else { if (S.view !== 'favs') S.view = 'list'; listView(); }
+  updateTabbar();
 }
 
 const standalone = () => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
@@ -577,12 +706,20 @@ function hintHtml() {
   return `<div class="hint">${icon('share')}<span>${isIos() ? 'Bấm <b>Chia sẻ</b> → <b>Thêm vào MH chính</b>, rồi mở từ biểu tượng đó để đọc offline và giữ truyện lâu dài. Nhập kho <b>trong biểu tượng đó</b> nhé (tab Safari thường có bộ nhớ riêng).' : 'Cài trang này thành ứng dụng (menu trình duyệt → <b>Cài đặt / Thêm vào màn hình chính</b>) để đọc offline.'}</span><button class="ib" data-act="hint-x" aria-label="Ẩn gợi ý">${icon('x')}</button></div>`;
 }
 
-function listView() {
-  const n = S.stories.length;
-  const head = sub => `<div class="top"><h1>Tủ truyện${sub ? `<small>${sub}</small>` : ''}</h1><button class="ib" data-act="import" aria-label="Nhập kho mới">${icon('import')}</button><button class="ib" data-act="settings" aria-label="Cài đặt">${icon('gear')}</button></div>`;
+// Tủ sách (view 'list') và Yêu thích (view 'favs') dùng chung một màn hình danh sách.
+// partial = true: chỉ vẽ lại phần thể loại + danh sách, giữ nguyên ô tìm kiếm, chỗ cuộn trang và chỗ cuộn hàng thể loại
+function listView(partial) {
+  const favMode = S.view === 'favs';
+  const base = favMode ? S.stories.filter(s => S.favs.has(s.id)) : S.stories;
+  const n = base.length;
+  const head = sub => `<div class="top"><h1>${favMode ? 'Yêu thích' : 'Tủ sách'}${sub ? `<small>${sub}</small>` : ''}</h1>${favMode ? '' : `<button class="ib" data-act="import" aria-label="Nhập kho mới">${icon('import')}</button>`}</div>`;
   if (!n) {
-    $app.innerHTML = `<div class="wrap">${head('')}${hintHtml()}
-      <div class="empty"><div class="big">${icon('book')}</div><h2>Tủ truyện còn trống</h2>
+    $app.innerHTML = favMode
+      ? `<div class="wrap">${head('')}<div class="empty fav-empty"><div class="big">${icon('heart')}</div><h2>Chưa có truyện yêu thích</h2>
+          <p>Mở một truyện rồi bấm nút <b>♡</b> ở góc trên để cất vào đây, mấy bộ hay ho tìm lại cho nhanh.</p>
+          ${S.stories.length ? `<button class="btn primary" data-act="tab" data-v="list">${icon('book')}Tới Tủ sách</button>` : ''}</div></div>`
+      : `<div class="wrap">${head('')}${hintHtml()}
+      <div class="empty"><div class="big">${icon('book')}</div><h2>Tủ sách còn trống</h2>
         <p>Nhập file kho <b>.wmkho</b> xuất từ app TienIchWM trên máy tính. Truyện được lưu ngay trong máy, đọc được cả khi không có mạng.</p>
         <button class="btn primary" data-act="import">${icon('import')}Nhập kho</button>
         <ol class="steps">
@@ -592,21 +729,22 @@ function listView() {
         </ol></div></div>`;
     return;
   }
-  const all = tagCounts();
+  const all = tagCounts(base);
   S.tags = S.tags.filter(t => all.some(x => x.name === t));
   // nhớ bộ lọc thể loại trong lịch sử: mở truyện rồi quay lại vẫn đúng danh sách đang lọc
-  try { if (history.state?.view === 'list' || !history.state) history.replaceState({ ...(history.state || {}), view: 'list', tags: [...S.tags] }, ''); } catch {}
-  const rows = shown();
+  try { if (history.state?.view === S.view || !history.state) history.replaceState({ ...(history.state || {}), view: S.view, tags: [...S.tags] }, ''); } catch {}
+  const rows = shown(base);
   if (prefs.sort === 'recent') rows.sort((a, b) => (S.pos.get(b.id)?.at || 0) - (S.pos.get(a.id)?.at || 0) || a.order - b.order);
   else if (prefs.sort === 'az') rows.sort((a, b) => a.title.localeCompare(b.title, 'vi'));
   const words = s => s.chapters.reduce((a, c) => a + c.words, 0);
+  const heart = s => S.favs.has(s.id) ? `<span class="heart" aria-label="Yêu thích">${icon('heart')}</span>` : '';
   const cards = prefs.layout === 'grid'
-    ? `<div class="grid">${rows.map(s => { const p = progress(s); return `<button class="tile" data-act="story" data-id="${esc(s.id)}">${coverHtml(s, p ? `<span class="bar"><i style="width:${pct(p.ratio)}"></i></span>` : '')}<span class="t">${esc(s.title)}</span>${s.author ? `<span class="a">${esc(s.author)}</span>` : ''}</button>`; }).join('')}</div>`
+    ? `<div class="grid">${rows.map(s => { const p = progress(s); return `<button class="tile" data-act="story" data-id="${esc(s.id)}">${coverHtml(s, (p ? `<span class="bar"><i style="width:${pct(p.ratio)}"></i></span>` : '') + heart(s))}<span class="t">${esc(s.title)}</span>${s.author ? `<span class="a">${esc(s.author)}</span>` : ''}</button>`; }).join('')}</div>`
     : `<div class="list">${rows.map(s => {
         const p = progress(s), tg = s.categories;
         return `<button class="card" data-act="story" data-id="${esc(s.id)}">${coverHtml(s)}<div class="info"><div class="t">${esc(s.title)}</div>
           ${s.author ? `<div class="a">${esc(s.author)}</div>` : ''}
-          <div class="m">${num(s.chapters.length)} chương · ${num(words(s))} từ</div>
+          <div class="m">${heart(s)}${heart(s) ? ' ' : ''}${num(s.chapters.length)} chương · ${num(words(s))} từ</div>
           ${prefs.showTags && tg.length ? `<div class="tg">${tg.slice(0, 6).map(t => `<span>${esc(t)}</span>`).join('')}${tg.length > 6 ? `<span class="x">+${tg.length - 6}</span>` : ''}</div>` : ''}
           ${prefs.showDesc && s.description ? `<div class="d">${esc(s.description)}</div>` : ''}
           ${p ? `<div class="p"><span class="reading">Chương ${p.i + 1}/${p.n}</span><span class="bar"><i style="width:${pct(p.ratio)}"></i></span><span>${pct(p.ratio)}</span></div>` : ''}</div></button>`;
@@ -614,21 +752,34 @@ function listView() {
   // Hàng thể loại: các thể loại nhiều truyện nhất + thể loại đang chọn, nút mở bảng chọn đầy đủ
   const top = [...all].sort((a, b) => b.n - a.n || a.name.localeCompare(b.name, 'vi')).slice(0, 8);
   for (const t of S.tags) if (!top.some(x => x.name === t)) top.push(all.find(x => x.name === t));
-  $app.innerHTML = `<div class="wrap">${head(`${num(n)} truyện`)}${hintHtml()}
+  const body = `${all.length ? `<div class="chips" data-chips><button class="chip${S.tags.length ? '' : ' on'}" data-act="tag-clear">Tất cả</button>${top.map(t => `<button class="chip${S.tags.includes(t.name) ? ' on' : ''}" data-act="tag" data-tag="${esc(t.name)}">${esc(t.name)}<small>${t.n}</small></button>`).join('')}<button class="chip more${S.tags.length ? ' on' : ''}" data-act="tags">${icon('filter')}Thể loại${S.tags.length ? ` (${S.tags.length})` : ''}</button></div>` : ''}
+    ${S.tags.length || S.q.trim() ? `<div class="filter-bar"><span><b>${num(rows.length)}</b> truyện khớp${S.tags.length > 1 ? ` · ${prefs.tagAll ? 'có đủ' : 'có một trong'} ${S.tags.length} thể loại` : ''}</span>${S.tags.length ? '<button data-act="tag-clear">Bỏ lọc thể loại</button>' : ''}</div>` : ''}
+    ${rows.length ? cards : '<div class="empty"><p>Không có truyện nào khớp.</p></div>'}`;
+  const old = $app.querySelector(`[data-lv="${S.view}"]`);
+  if (partial && old) {
+    const chipX = $app.querySelector('[data-chips]')?.scrollLeft || 0, y = scrollY;
+    old.innerHTML = body;
+    const ch = $app.querySelector('[data-chips]'); if (ch) ch.scrollLeft = chipX;
+    scrollTo(0, Math.min(y, maxY()));
+    return;
+  }
+  $app.innerHTML = `<div class="wrap">${head(`${num(n)} truyện`)}${favMode ? '' : hintHtml()}
     <div class="tools"><label class="search">${icon('search')}<input type="search" placeholder="Tìm tên truyện, tác giả, thể loại…" value="${esc(S.q)}" data-q aria-label="Tìm truyện" enterkeyhint="search"></label>
       <button class="ib" data-act="layout" aria-label="${prefs.layout === 'grid' ? 'Xem dạng danh sách' : 'Xem dạng lưới'}">${icon(prefs.layout === 'grid' ? 'rows' : 'grid')}</button></div>
-    ${all.length ? `<div class="chips"><button class="chip${S.tags.length ? '' : ' on'}" data-act="tag-clear">Tất cả</button>${top.map(t => `<button class="chip${S.tags.includes(t.name) ? ' on' : ''}" data-act="tag" data-tag="${esc(t.name)}">${esc(t.name)}<small>${t.n}</small></button>`).join('')}<button class="chip more${S.tags.length ? ' on' : ''}" data-act="tags">${icon('filter')}Thể loại${S.tags.length ? ` (${S.tags.length})` : ''}</button></div>` : ''}
-    ${S.tags.length || S.q.trim() ? `<div class="filter-bar"><span><b>${num(rows.length)}</b> truyện khớp${S.tags.length > 1 ? ` · ${prefs.tagAll ? 'có đủ' : 'có một trong'} ${S.tags.length} thể loại` : ''}</span>${S.tags.length ? '<button data-act="tag-clear">Bỏ lọc thể loại</button>' : ''}</div>` : ''}
-    ${rows.length ? cards : '<div class="empty"><p>Không có truyện nào khớp.</p></div>'}</div>`;
+    <div data-lv="${S.view}">${body}</div></div>`;
+  // thể loại đang chọn nằm khuất bên phải thì cuộn hàng thể loại tới đó
+  const on = $app.querySelector('[data-chips] .chip.on[data-tag]');
+  if (on) { const ch = on.parentElement; ch.scrollLeft = Math.max(0, on.offsetLeft - ch.clientWidth / 2 + on.offsetWidth / 2); }
 }
-function tagCounts() {
+const isListView = () => S.view === 'list' || S.view === 'favs';
+function tagCounts(base = S.view === 'favs' ? S.stories.filter(s => S.favs.has(s.id)) : S.stories) {
   const m = new Map();
-  for (const s of S.stories) for (const t of new Set(s.categories)) m.set(t, (m.get(t) || 0) + 1);
+  for (const s of base) for (const t of new Set(s.categories)) m.set(t, (m.get(t) || 0) + 1);
   return [...m].map(([name, n]) => ({ name, n }));
 }
-function shown() {
+function shown(base = S.view === 'favs' ? S.stories.filter(s => S.favs.has(s.id)) : S.stories) {
   const q = plain(S.q.trim());
-  return S.stories.filter(s => (!q || [s.title, s.author, ...s.categories].some(x => plain(x).includes(q)))
+  return base.filter(s => (!q || [s.title, s.author, ...s.categories].some(x => plain(x).includes(q)))
     && (!S.tags.length || (prefs.tagAll ? S.tags.every(t => s.categories.includes(t)) : S.tags.some(t => s.categories.includes(t)))));
 }
 /* ---- Bảng chọn thể loại (như “Tìm theo thể loại” trên app máy tính) ---- */
@@ -665,7 +816,7 @@ function storyView() {
   let link = null;
   try { const u = new URL(s.link); if (u.protocol === 'https:' || u.protocol === 'http:') link = u; } catch {}
   const linkName = link ? (/archiveofourown\.org$/i.test(link.hostname) ? 'AO3' : link.hostname.replace(/^www\./, '')) : '';
-  $app.innerHTML = `<div class="wrap"><div class="top"><button class="ib" data-act="back" aria-label="Quay lại">${icon('back')}</button><span class="title"></span><button class="ib" data-act="settings" aria-label="Cài đặt">${icon('gear')}</button></div>
+  $app.innerHTML = `<div class="wrap"><div class="top"><button class="ib" data-act="back" aria-label="Quay lại">${icon('back')}</button><span class="title"></span><button class="ib fav${S.favs.has(s.id) ? ' on' : ''}" data-act="fav" aria-pressed="${S.favs.has(s.id)}" aria-label="${S.favs.has(s.id) ? 'Bỏ khỏi Yêu thích' : 'Thêm vào Yêu thích'}">${icon('heart')}</button><button class="ib" data-act="settings" aria-label="Cài đặt">${icon('gear')}</button></div>
     <div class="story-head">${coverHtml(s)}<div style="min-width:0"><h2>${esc(s.title)}</h2>${s.author ? `<div class="a">${esc(s.author)}</div>` : ''}
       <div class="meta"><span>${num(s.chapters.length)} chương · ${num(words)} từ</span>${p ? `<span>Đã đọc ${pct(p.ratio)}</span>` : ''}</div>
       ${link ? `<a class="src-link" href="${esc(link.href)}" target="_blank" rel="noopener noreferrer" data-src-link>${icon('link')}<span>Link gốc · ${esc(linkName)}</span></a>` : ''}</div></div>
@@ -673,7 +824,8 @@ function storyView() {
     ${s.description ? `<div class="desc" data-desc>${esc(s.description)}</div><button class="more" data-act="more">Xem thêm</button>` : ''}
     ${s.chapters.length ? `<button class="btn primary go" data-act="read" data-cid="${esc(cur || s.chapters[0].id)}">${icon('book')}${p ? `Đọc tiếp · Chương ${p.i + 1}` : 'Bắt đầu đọc'}</button>` : ''}
     <div class="sec"><span>Mục lục</span><span>${num(s.chapters.length)} chương</span></div>
-    <div class="chapters">${s.chapters.map((c, i) => `<button class="ch${c.id === cur ? ' cur' : p && i < p.i ? ' done' : ''}" data-act="read" data-cid="${esc(c.id)}"><span class="n">${i + 1}</span><span class="ct">${esc(c.title)}</span><span class="w">${num(c.words)}</span></button>`).join('') || '<div class="ch">Truyện chưa có chương nào.</div>'}</div></div>`;
+    <div class="chapters">${s.chapters.map((c, i) => `<button class="ch${c.id === cur ? ' cur' : p && i < p.i ? ' done' : ''}" data-act="read" data-cid="${esc(c.id)}"><span class="n">${i + 1}</span><span class="ct">${esc(c.title)}</span><span class="w">${num(c.words)}</span></button>`).join('') || '<div class="ch">Truyện chưa có chương nào.</div>'}</div>
+    <div class="del-zone"><button class="btn danger block" data-act="del-story">${icon('trash')}Xoá truyện khỏi điện thoại</button><small>Chỉ xoá trên điện thoại này, truyện trên máy tính vẫn còn</small></div></div>`;
   const d = $app.querySelector('[data-desc]');
   if (d && d.scrollHeight <= d.clientHeight + 4) { d.classList.add('open'); $app.querySelector('[data-act=more]')?.remove(); }
   if (S.scrollTo != null) { scrollTo(0, S.scrollTo); S.scrollTo = null; } else scrollTo(0, 0);
@@ -749,13 +901,170 @@ addEventListener('scroll', () => {
   lastY = scrollY;
   savePos(false);
 }, { passive: true });
-addEventListener('pagehide', () => savePos(true));
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') savePos(true); else if (S.view === 'read') requestWake(); });
+addEventListener('pagehide', () => { savePos(true); flushDraft(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { savePos(true); flushDraft(); } else if (S.view === 'read') requestWake(); });
 
 // Giữ màn hình sáng khi đọc (iOS 16.4+), tắt khi rời trang đọc
 let wake = null;
 async function requestWake() { if (!prefs.keepAwake || S.view !== 'read' || wake) return; try { wake = await navigator.wakeLock?.request('screen'); wake?.addEventListener('release', () => { wake = null; }); } catch { wake = null; } }
 function releaseWake() { try { wake?.release(); } catch {} wake = null; }
+
+/* ===== Viết truyện: bản nháp lưu trong máy (IndexedDB “drafts”), tự lưu khi gõ, xuất .wmkho để nhập vào app TienIchWM trên máy tính =====
+   Bản nháp: { id, title, author, cats (chuỗi, phân cách bằng dấu phẩy), description, chapters: [{ id, title, text }], created, updated } */
+const draft = id => S.drafts.find(d => d.id === id);
+const wc = t => (String(t || '').match(/\S+/g) || []).length;
+const draftWords = d => d.chapters.reduce((a, c) => a + wc(c.text), 0);
+const catsOf = d => [...new Set(String(d.cats || '').split(/[,;，、\n]/).map(x => x.replace(/\s+/g, ' ').trim()).filter(Boolean))].slice(0, 20);
+const when = iso => { try { const t = new Date(iso), now = new Date(); return t.toDateString() === now.toDateString() ? 'hôm nay ' + t.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : t.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); } catch { return ''; } };
+let draftTimer = 0, dirtyDraft = null;
+function saveDraftSoon(d) {
+  d.updated = new Date().toISOString();
+  dirtyDraft = d;
+  const x = $app.querySelector('[data-saved]'); if (x) { x.textContent = 'Đang lưu…'; x.classList.add('busy-s'); }
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(flushDraft, 500);
+}
+async function flushDraft() {
+  clearTimeout(draftTimer);
+  const d = dirtyDraft; dirtyDraft = null;
+  if (!d) return;
+  try {
+    await put('drafts', d);
+    const x = $app.querySelector('[data-saved]'); if (x) { x.textContent = '✓ Đã lưu nháp ' + when(d.updated); x.classList.remove('busy-s'); }
+  } catch (e) { toast(e?.name === 'QuotaExceededError' ? 'Điện thoại hết chỗ lưu, chưa lưu được bản nháp' : 'Không lưu được bản nháp: ' + (e?.message || ''), true); }
+}
+async function saveDraftNow(d) { d.updated = new Date().toISOString(); if (dirtyDraft === d) dirtyDraft = null; await put('drafts', d); }
+const savedLabel = d => `<span class="saved" data-saved>${d.updated ? '✓ Đã lưu nháp ' + when(d.updated) : 'Tự lưu khi gõ'}</span>`;
+
+function draftsView() {
+  const n = S.drafts.length;
+  $app.innerHTML = `<div class="wrap"><div class="top"><h1>Viết truyện<small>${n ? `${num(n)} bản nháp · tự lưu trong máy` : 'Bản nháp lưu ngay trong máy'}</small></h1>${n ? `<button class="ib" data-act="new-draft" aria-label="Viết truyện mới">${icon('plus')}</button>` : ''}</div>
+    ${n ? `<div class="row-btns"><button class="btn primary" data-act="new-draft">${icon('pen')}Viết truyện mới</button><button class="btn" data-act="export-drafts">${icon('share')}Xuất ${n > 1 ? 'tất cả' : 'file'}</button></div>
+      <div class="draft-list">${S.drafts.map(d => `<button class="draft" data-act="open-draft" data-id="${esc(d.id)}"><span class="ic">${icon('file')}</span><span class="lbl"><b>${esc(d.title.trim() || 'Chưa đặt tên')}</b><small>${num(d.chapters.length)} chương · ${num(draftWords(d))} từ · sửa ${esc(when(d.updated))}</small></span>${icon('next')}</button>`).join('')}</div>`
+    : `<div class="empty"><div class="big">${icon('pen')}</div><h2>Chưa có bản nháp</h2><p>Viết truyện ngay trên điện thoại, gõ tới đâu tự lưu tới đó (không cần mạng). Xong thì xuất file <b>.wmkho</b> để đưa vào app TienIchWM trên máy tính.</p><button class="btn primary" data-act="new-draft">${icon('pen')}Viết truyện mới</button></div>`}
+    <div class="note"><b>Đưa sang máy tính:</b> bấm <b>Xuất</b> → gửi file qua Zalo (hoặc Lưu vào Tệp) → trên máy tính mở <b>Kho truyện → 📥 Nhập truyện</b> rồi kéo file vào. Lần sau xuất lại, máy tính chỉ thêm các chương mới; chương đã có trên máy tính không bị sửa.</div></div>`;
+}
+function draftView() {
+  const d = draft(S.did);
+  $app.innerHTML = `<div class="wrap"><div class="top"><button class="ib" data-act="back" aria-label="Về danh sách bản nháp">${icon('back')}</button><span class="title">Bản nháp<br>${savedLabel(d)}</span><button class="ib" data-act="export-draft" aria-label="Xuất file truyện này">${icon('share')}</button></div>
+    <div class="form">
+      <label>Tên truyện<input data-df="title" maxlength="200" value="${esc(d.title)}" placeholder="Ví dụ: Gió mùa hạ" enterkeyhint="next"></label>
+      <label>Tác giả<input data-df="author" maxlength="120" value="${esc(d.author)}" placeholder="(không bắt buộc)" enterkeyhint="next"></label>
+      <label>Thể loại / thẻ<input data-df="cats" maxlength="600" value="${esc(d.cats)}" placeholder="Cách nhau bằng dấu phẩy: Đam mỹ, HE, Fluff"></label>
+      <label>Giới thiệu<textarea data-df="description" maxlength="5000" placeholder="(không bắt buộc)">${esc(d.description)}</textarea></label>
+    </div>
+    <div class="sec" style="margin-top:18px"><span>Chương</span><span>${num(d.chapters.length)} chương · ${num(draftWords(d))} từ</span></div>
+    <div class="chapters chs-ed">${d.chapters.map((c, i) => `<div class="ch"><button class="open-ch" data-act="open-chap" data-cid="${esc(c.id)}"><span class="n">${i + 1}</span><span class="ct">${esc(c.title.trim() || `Chương ${i + 1}`)}</span><span class="w">${num(wc(c.text))} từ</span></button>
+        <button class="ib" data-act="move-chap" data-cid="${esc(c.id)}" data-d="-1" aria-label="Đưa lên"${i ? '' : ' disabled'}>${icon('up')}</button><button class="ib" data-act="move-chap" data-cid="${esc(c.id)}" data-d="1" aria-label="Đưa xuống"${i < d.chapters.length - 1 ? '' : ' disabled'}>${icon('down')}</button></div>`).join('') || '<div class="ch">Chưa có chương nào.</div>'}</div>
+    <button class="btn block" style="margin-top:10px" data-act="add-chap">${icon('plus')}Thêm chương</button>
+    <div class="row-btns" style="margin-top:18px"><button class="btn primary" data-act="export-draft">${icon('share')}Xuất file</button><button class="btn danger" data-act="del-draft">${icon('trash')}Xoá bản nháp</button></div></div>`;
+  if (S.scrollTo != null) { scrollTo(0, S.scrollTo); S.scrollTo = null; } else scrollTo(0, 0);
+}
+const grow = t => { t.style.height = 'auto'; t.style.height = Math.max(t.scrollHeight + 2, innerHeight * 0.62) + 'px'; };
+function chapView() {
+  const d = draft(S.did), i = d.chapters.findIndex(c => c.id === S.chid), c = d.chapters[i], last = i === d.chapters.length - 1;
+  $app.innerHTML = `<div class="wrap"><div class="top"><button class="ib" data-act="back" aria-label="Về bản nháp">${icon('back')}</button><span class="title">Chương ${i + 1}/${d.chapters.length}<br>${savedLabel(d)}</span><button class="ib" data-act="del-chap" aria-label="Xoá chương này">${icon('trash')}</button></div>
+    <input class="ed-title" data-cf="title" maxlength="200" value="${esc(c.title)}" placeholder="Tên chương (ví dụ: Chương ${i + 1}: Gặp gỡ)">
+    <textarea class="ed-text" data-cf="text" placeholder="Viết nội dung chương ở đây…&#10;&#10;Mỗi lần xuống dòng là một đoạn. Gõ * * * để ngắt cảnh.">${esc(c.text)}</textarea>
+    <div class="ed-meta"><span data-wc>${num(wc(c.text))} từ</span><span>Gõ tới đâu tự lưu tới đó</span></div>
+    <div class="row-btns" style="margin-top:14px"><button class="btn" data-act="step-chap" data-d="-1"${i ? '' : ' disabled'}>${icon('back')}Chương trước</button>${last ? `<button class="btn primary" data-act="add-chap">${icon('plus')}Chương mới</button>` : `<button class="btn primary" data-act="step-chap" data-d="1">Chương sau${icon('next')}</button>`}</div></div>`;
+  const ta = $app.querySelector('.ed-text'); grow(ta);
+  scrollTo(0, 0);
+}
+async function newDraft() {
+  let author = ''; try { author = localStorage.getItem('draft-author') || ''; } catch {}
+  const now = new Date().toISOString();
+  const d = { id: newId(), title: '', author, cats: '', description: '', chapters: [{ id: newId(), title: 'Chương 1', text: '' }], created: now, updated: now };
+  await put('drafts', d);
+  S.drafts.unshift(d);
+  go({ view: 'draft', did: d.id });
+  $app.querySelector('[data-df=title]')?.focus();
+}
+async function addChap() {
+  const d = draft(S.did); if (!d) return;
+  const c = { id: newId(), title: `Chương ${d.chapters.length + 1}`, text: '' };
+  d.chapters.push(c);
+  await saveDraftNow(d);
+  go({ view: 'chap', did: d.id, chid: c.id }, S.view === 'chap'); // từ trang chương bấm “Chương mới”: quay lại vẫn về bản nháp
+  $app.querySelector('.ed-text')?.focus();
+}
+async function moveChap(cid, step) {
+  const d = draft(S.did), i = d?.chapters.findIndex(c => c.id === cid), j = i + step;
+  if (!d || i < 0 || j < 0 || j >= d.chapters.length) return;
+  [d.chapters[i], d.chapters[j]] = [d.chapters[j], d.chapters[i]];
+  await saveDraftNow(d);
+  S.scrollTo = scrollY; draftView();
+}
+async function delChap() {
+  const d = draft(S.did), c = d?.chapters.find(c => c.id === S.chid);
+  if (!c) return;
+  if ((c.text.trim() || d.chapters.length === 1) && !confirm(`Xoá “${c.title.trim() || 'chương này'}”${c.text.trim() ? ` (${num(wc(c.text))} từ)` : ''}? Không lấy lại được.`)) return;
+  d.chapters = d.chapters.filter(x => x !== c);
+  await saveDraftNow(d);
+  toast('Đã xoá chương');
+  history.back();
+}
+async function delDraft() {
+  const d = draft(S.did); if (!d) return;
+  if (!confirm(`Xoá bản nháp “${d.title.trim() || 'Chưa đặt tên'}” (${num(d.chapters.length)} chương, ${num(draftWords(d))} từ)? Không lấy lại được.\n\nĐã xuất file sang máy tính thì truyện trên máy tính vẫn còn.`)) return;
+  if (dirtyDraft === d) { clearTimeout(draftTimer); dirtyDraft = null; }
+  const x = await db(), tx = x.transaction('drafts', 'readwrite'); tx.objectStore('drafts').delete(d.id); await done(tx);
+  S.drafts = S.drafts.filter(y => y !== d);
+  toast('Đã xoá bản nháp');
+  history.back();
+}
+// Xuất bản nháp thành file .wmkho (cùng định dạng app máy tính nhập được), gửi qua bảng Chia sẻ của iPhone hoặc tải về
+let exportFile = null;
+async function exportDrafts(list) {
+  await flushDraft();
+  const items = list.map(d => ({ d, chs: d.chapters.filter(c => c.text.trim()) })).filter(x => x.chs.length);
+  if (!items.length) { toast('Chưa có chương nào có chữ để xuất', true); return; }
+  showBusy('Đang tạo file…');
+  try {
+    const kho = { format: FORMAT, version: 1, exported: new Date().toISOString(), source: 'doc-truyen-web',
+      stories: items.map(({ d, chs }) => ({ id: d.id, title: d.title.trim() || 'Truyện chưa đặt tên', author: d.author.trim(), link: '', categories: catsOf(d),
+        description: d.description.trim(), updated: d.updated, cover: null, read: null,
+        chapters: chs.map(c => ({ id: c.id, title: c.title.trim() || `Chương ${d.chapters.indexOf(c) + 1}`, words: wc(c.text), text: c.text.replace(/\r\n?/g, '\n') })), images: {} })) };
+    let blob = new Blob([JSON.stringify(kho)], { type: 'application/json' });
+    if (typeof CompressionStream !== 'undefined') blob = await new Response(blob.stream().pipeThrough(new CompressionStream('gzip'))).blob();
+    const t = new Date(), p2 = x => String(x).padStart(2, '0');
+    const stamp = `${t.getFullYear()}-${p2(t.getMonth() + 1)}-${p2(t.getDate())}-${p2(t.getHours())}${p2(t.getMinutes())}`;
+    const base = items.length === 1 ? plain(items[0].d.title).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'BanNhap' : 'BanNhap';
+    exportFile = new File([blob], `${base}-${stamp}.wmkho`, { type: 'application/octet-stream' });
+    hideBusy();
+    const nch = items.reduce((a, x) => a + x.chs.length, 0), skipped = list.reduce((a, d) => a + d.chapters.length, 0) - nch;
+    let canShare = false; try { canShare = !!navigator.canShare?.({ files: [exportFile] }); } catch {}
+    const size = exportFile.size < 1024 ? exportFile.size + ' B' : exportFile.size < 1048576 ? Math.ceil(exportFile.size / 1024) + ' KB' : (exportFile.size / 1048576).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + ' MB';
+    openSheet(`<h3>Xuất bản nháp</h3>
+      <div class="group"><div class="item"><span class="ico">${icon('file')}</span><span class="lbl">${esc(exportFile.name)}<small>${num(items.length)} truyện · ${num(nch)} chương · ${size}${skipped ? ` · bỏ ${num(skipped)} chương trống` : ''}</small></span></div></div>
+      <div class="row-btns" style="margin-top:12px">${canShare ? `<button class="btn primary" data-act="share-file">${icon('share')}Gửi file</button>` : ''}<button class="btn${canShare ? '' : ' primary'}" data-act="dl-file">${icon('import')}Tải file về</button></div>
+      <div class="note" style="margin-top:0">Gửi file qua <b>Zalo</b> sang máy tính (hoặc <b>Lưu vào Tệp</b>). Trên máy tính: <b>Kho truyện → 📥 Nhập truyện</b> → kéo file vào là xong.</div>`);
+  } catch (e) { hideBusy(); toast('Không tạo được file: ' + (e?.message || ''), true); }
+}
+async function shareFile() {
+  if (!exportFile) return;
+  try { await navigator.share({ files: [exportFile], title: exportFile.name }); closeSheet(); }
+  catch (e) { if (e?.name !== 'AbortError') toast('Không mở được bảng chia sẻ, thử “Tải file về” nhé', true); }
+}
+function downloadFile() {
+  if (!exportFile) return;
+  const u = URL.createObjectURL(exportFile), a = document.createElement('a');
+  a.href = u; a.download = exportFile.name; document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(u), 60000);
+  closeSheet(); toast('Đã tải file ' + exportFile.name);
+}
+
+/* ===== Thanh dưới ===== */
+const TOP = ['list', 'favs', 'drafts', 'settings'];
+const TABS = [['list', 'book', 'Tủ sách'], ['favs', 'heart', 'Yêu thích'], ['drafts', 'pen', 'Viết'], ['settings', 'gear', 'Cài đặt']];
+function updateTabbar() {
+  const show = TOP.includes(S.view);
+  document.body.classList.toggle('has-tabs', show);
+  let bar = document.querySelector('.tabbar');
+  if (!show) { bar?.remove(); return; }
+  if (!bar) { document.body.insertAdjacentHTML('beforeend', '<nav class="tabbar" aria-label="Mục chính"><div></div></nav>'); bar = document.querySelector('.tabbar'); }
+  bar.firstElementChild.innerHTML = TABS.map(([v, ic, l]) => `<button data-act="tab" data-v="${v}" class="${S.view === v ? 'on' : ''}"${S.view === v ? ' aria-current="page"' : ''}><span class="pill">${icon(ic)}${v === 'favs' && S.favs.size ? `<span class="badge">${num(S.favs.size)}</span>` : ''}</span>${l}</button>`).join('');
+}
 
 /* ===== Bảng trượt ===== */
 function closeSheet() { document.querySelectorAll('.sheet, .sheet-bg').forEach(x => x.remove()); }
@@ -790,7 +1099,7 @@ function fontItems(short) {
 }
 async function settingsView() {
   const m = S.meta, chapters = S.stories.reduce((a, s) => a + s.chapters.length, 0);
-  $app.innerHTML = `<div class="wrap"><div class="top"><button class="ib" data-act="back" aria-label="Quay lại">${icon('back')}</button><span class="title">Cài đặt</span><span class="spacer"></span></div>
+  $app.innerHTML = `<div class="wrap">${S.from && !TOP.includes(S.from) ? `<div class="top"><button class="ib" data-act="back" aria-label="Quay lại">${icon('back')}</button><span class="title">Cài đặt</span><span class="spacer"></span></div>` : '<div class="top"><h1>Cài đặt</h1></div>'}
     <div class="group-t">Giao diện</div>
     <div class="group">${themeItem()}
       <div class="item stack"><span>Màu nhấn</span><div class="dots">${ACCENTS.map(([k, l, c]) => `<button class="dot${prefs.accent === k ? ' on' : ''}" style="background:${c}" data-set="accent" data-v="${k}" aria-label="${l}" title="${l}"></button>`).join('')}</div></div></div>
@@ -811,7 +1120,7 @@ async function settingsView() {
       ${toggle('keepAwake', 'Giữ màn hình luôn sáng', 'Màn hình không tự tắt khi đang đọc (tốn pin hơn)')}
     </div>
 
-    <div class="group-t">Tủ truyện</div>
+    <div class="group-t">Tủ sách</div>
     <div class="group">
       <div class="item stack"><span>Sắp xếp</span>${seg('sort', [['recent', 'Đọc gần đây'], ['kho', 'Theo kho'], ['az', 'Tên A–Z']])}</div>
       <div class="item stack"><span>Kiểu hiển thị</span>${seg('layout', [['list', 'Danh sách'], ['grid', 'Lưới bìa']])}</div>
@@ -875,7 +1184,7 @@ function hideBusy() { document.querySelector('.busy')?.remove(); }
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-act], button[data-set]');
   if (!t || t.disabled) return;
-  if (t.dataset.set === 'tagAll') { setPref('tagAll', t.dataset.v === 'true'); refreshTagSheet(); listView(); return; }
+  if (t.dataset.set === 'tagAll') { setPref('tagAll', t.dataset.v === 'true'); refreshTagSheet(); listView(true); return; }
   if (t.dataset.set) { setPref(t.dataset.set, t.dataset.v); refreshSettingsUi(t.dataset.set); return; }
   const a = t.dataset.act;
   if (a === 'import') { closeSheet(); pickFile(); }
@@ -883,15 +1192,40 @@ document.addEventListener('click', e => {
   else if (a === 'aa') aaSheet();
   else if (a === 'close') { closeSheet(); pending = null; }
   else if (a === 'imp-go') { if (pending) applyImport(); }
-  else if (a === 'imp-cancel') { closeSheet(); pending = null; toast('Đã huỷ, tủ truyện giữ nguyên'); }
-  else if (a === 'pick-all') { const l = pending.rows.filter(r => r.kind === t.dataset.k), v = !l.every(r => r.on); l.forEach(r => { r.on = v; const x = document.querySelector('.sheet [data-pick="' + r.i + '"]'); if (x) x.checked = v; }); refreshImportSheet(); }
+  else if (a === 'imp-cancel') { closeSheet(); pending = null; toast('Đã huỷ, tủ sách giữ nguyên'); }
+  else if (a === 'pick-all') { const l = pending.rows.filter(r => r.kind === t.dataset.k), v = !l.every(r => r.mode !== 'skip'); l.forEach(r => { r.mode = v ? 'add' : 'skip'; }); refreshImportSheet(); }
+  else if (a === 'imp-mode') { const r = pending?.rows.find(r => r.i === Number(t.dataset.i)); if (r) { r.mode = t.dataset.m; refreshImportSheet(); } }
+  else if (a === 'mode-all') { pending?.rows.filter(r => r.kind === t.dataset.k).forEach(r => { r.mode = t.dataset.m; }); refreshImportSheet(); }
   else if (a === 'wipe') wipe();
   else if (a === 'reset-pos') resetPos();
   else if (a === 'reset-prefs') { if (confirm('Đưa mọi cài đặt (chủ đề, phông chữ, cỡ chữ…) về mặc định?')) { prefs = { ...DEFAULTS }; savePrefs(); refreshSettingsUi(); toast('Đã khôi phục cài đặt mặc định'); } }
   else if (a === 'hint-x') { prefs.hint = false; savePrefs(); t.closest('.hint')?.remove(); }
-  else if (a === 'layout') { prefs.layout = prefs.layout === 'grid' ? 'list' : 'grid'; savePrefs(); listView(); }
-  else if (a === 'tag') { const k = t.dataset.tag; S.tags = S.tags.includes(k) ? S.tags.filter(x => x !== k) : [...S.tags, k]; listView(); refreshTagSheet(); }
-  else if (a === 'tag-clear') { S.tags = []; listView(); refreshTagSheet(); }
+  else if (a === 'layout') { prefs.layout = prefs.layout === 'grid' ? 'list' : 'grid'; savePrefs(); const y = scrollY; listView(); scrollTo(0, Math.min(y, maxY())); }
+  else if (a === 'tag') { const k = t.dataset.tag; S.tags = S.tags.includes(k) ? S.tags.filter(x => x !== k) : [...S.tags, k]; listView(true); refreshTagSheet(); } // chỉ vẽ lại danh sách: giữ chỗ cuộn trang + hàng thể loại
+  else if (a === 'tag-clear') { S.tags = []; listView(true); refreshTagSheet(); }
+  else if (a === 'tab') {
+    closeSheet();
+    const v = t.dataset.v;
+    if (S.view === v) { scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    if (S.view === 'read') savePos(true);
+    if (v === 'list' || v === 'favs') { S.tags = []; S.q = ''; }
+    go({ view: v, from: null }, TOP.includes(S.view)); // đổi tab: không chồng lịch sử
+    if (v !== 'settings') scrollTo(0, 0);
+  }
+  else if (a === 'fav') toggleFav(S.sid);
+  else if (a === 'del-story') deleteStory(S.sid);
+  else if (a === 'new-draft') newDraft();
+  else if (a === 'open-draft') go({ view: 'draft', did: t.dataset.id });
+  else if (a === 'open-chap') { S.draftY = scrollY; go({ view: 'chap', chid: t.dataset.cid }); }
+  else if (a === 'add-chap') { if (S.view === 'draft') S.draftY = scrollY; addChap(); }
+  else if (a === 'move-chap') moveChap(t.dataset.cid, Number(t.dataset.d));
+  else if (a === 'step-chap') { const d = draft(S.did), i = d.chapters.findIndex(c => c.id === S.chid) + Number(t.dataset.d); if (d.chapters[i]) go({ view: 'chap', chid: d.chapters[i].id }, true); }
+  else if (a === 'del-chap') delChap();
+  else if (a === 'del-draft') delDraft();
+  else if (a === 'export-draft') exportDrafts([draft(S.did)].filter(Boolean));
+  else if (a === 'export-drafts') exportDrafts(S.drafts);
+  else if (a === 'share-file') shareFile();
+  else if (a === 'dl-file') downloadFile();
   else if (a === 'tag-go') { S.tags = [t.dataset.tag]; S.q = ''; S.listY = 0; go({ view: 'list' }); scrollTo(0, 0); } // bấm thể loại trong trang truyện: danh sách truyện cùng thể loại, nút quay lại về truyện
   else if (a === 'tags') { S.tagq = ''; tagSheet(); }
   else if (a === 'tag-letter') document.querySelector(`.sheet [data-group="${t.dataset.l}"]`)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
@@ -906,7 +1240,13 @@ document.addEventListener('click', e => {
 document.addEventListener('input', e => {
   const t = e.target;
   if (t.matches('[data-tagq]')) { S.tagq = t.value; refreshTagSheet(); return; }
-  if (t.matches('[data-q]')) { S.q = t.value; const at = t.selectionStart; listView(); const q = $app.querySelector('[data-q]'); q.focus(); q.setSelectionRange(at, at); return; }
+  if (t.matches('[data-q]')) { S.q = t.value; listView(true); return; }
+  if (t.matches('[data-df]')) { const d = draft(S.did); if (d) { d[t.dataset.df] = t.value; saveDraftSoon(d); if (t.dataset.df === 'author') try { localStorage.setItem('draft-author', t.value.trim()); } catch {} } return; }
+  if (t.matches('[data-cf]')) {
+    const d = draft(S.did), c = d?.chapters.find(c => c.id === S.chid);
+    if (c) { c[t.dataset.cf] = t.value; saveDraftSoon(d); if (t.dataset.cf === 'text') { grow(t); const w = $app.querySelector('[data-wc]'); if (w) w.textContent = num(wc(t.value)) + ' từ'; } }
+    return;
+  }
   if (t.matches('input[type=range][data-set]')) {
     setPref(t.dataset.set, t.value);
     const v = document.querySelector(`[data-val="${t.dataset.set}"]`); if (v) v.textContent = FMT[t.dataset.set](prefs[t.dataset.set]);
@@ -915,31 +1255,35 @@ document.addEventListener('input', e => {
 document.addEventListener('change', e => {
   const t = e.target;
   if (t.matches('input[type=checkbox][data-set]')) setPref(t.dataset.set, t.checked);
-  if (t.matches('[data-pick]') && pending) { const r = pending.rows.find(r => r.i === Number(t.dataset.pick)); if (r) r.on = t.checked; refreshImportSheet(); }
+  if (t.matches('[data-pick]') && pending) { const r = pending.rows.find(r => r.i === Number(t.dataset.pick)); if (r) r.mode = t.checked ? 'add' : 'skip'; refreshImportSheet(); }
   if (t.matches('[data-drop]') && pending) { pending.drop = t.checked; refreshImportSheet(); }
   if (t.matches('input[type=range][data-set]') && S.view === 'read') { const r = ratio(); requestAnimationFrame(() => scrollTo(0, r * maxY())); }
 });
 
 /* ===== Điều hướng: dùng lịch sử trình duyệt để vuốt / nút quay lại hoạt động ===== */
 function hashOf(st) {
-  return st.view === 'list' ? location.pathname + location.search : st.view === 'settings' ? '#cai-dat' : st.view === 'story' ? `#s=${encodeURIComponent(st.sid)}` : `#s=${encodeURIComponent(st.sid)}&c=${encodeURIComponent(st.cid)}`;
+  const e = encodeURIComponent;
+  return st.view === 'list' ? location.pathname + location.search : st.view === 'settings' ? '#cai-dat' : st.view === 'favs' ? '#yeu-thich' : st.view === 'drafts' ? '#viet'
+    : st.view === 'draft' ? `#viet=${e(st.did)}` : st.view === 'chap' ? `#viet=${e(st.did)}&ch=${e(st.chid)}` : st.view === 'story' ? `#s=${e(st.sid)}` : `#s=${e(st.sid)}&c=${e(st.cid)}`;
 }
 function go(state, replace) {
   if (S.view === 'read') savePos(true);
   if (state.view === 'settings') { state.sid = S.sid; state.cid = S.cid; state.from = S.view; }
+  if (state.view === 'chap' || state.view === 'draft') state.did ??= S.did;
   Object.assign(S, state);
-  history[replace ? 'replaceState' : 'pushState']({ view: state.view, sid: state.sid ?? null, cid: state.cid ?? null }, '', hashOf(state));
+  history[replace ? 'replaceState' : 'pushState']({ view: state.view, sid: state.sid ?? null, cid: state.cid ?? null, did: state.did ?? null, chid: state.chid ?? null, from: state.from ?? null }, '', hashOf(state));
   render();
 }
 addEventListener('popstate', e => {
   if (S.view === 'read') savePos(true);
   const st = e.state || { view: 'list' };
   const was = S.view;
-  S.view = st.view; S.sid = st.sid; S.cid = st.cid;
-  if (st.view === 'list') S.tags = Array.isArray(st.tags) ? st.tags : [];
+  S.view = st.view; S.sid = st.sid; S.cid = st.cid; S.did = st.did ?? null; S.chid = st.chid ?? null; S.from = st.from ?? null;
+  if (st.view === 'list' || st.view === 'favs') S.tags = Array.isArray(st.tags) ? st.tags : [];
   closeSheet();
   render();
-  if (S.view === 'list' && was !== 'list' && S.listY != null) scrollTo(0, S.listY);
+  if (isListView() && !TOP.includes(was) && S.listY != null) scrollTo(0, S.listY);
+  else if (S.view === 'draft' && was === 'chap') scrollTo(0, S.draftY || 0);
 });
 
 (async () => {
@@ -957,7 +1301,15 @@ addEventListener('popstate', e => {
     history.pushState({ view: 'story', sid, cid: null }, '', `#s=${encodeURIComponent(sid)}`);
     if (cid && story(sid).chapters.some(c => c.id === cid)) { history.pushState({ view: 'read', sid, cid }, '', `#s=${encodeURIComponent(sid)}&c=${encodeURIComponent(cid)}`); Object.assign(S, { view: 'read', sid, cid }); }
     else Object.assign(S, { view: 'story', sid });
-  } else if (raw === 'cai-dat') { history.pushState({ view: 'settings' }, '', '#cai-dat'); S.view = 'settings'; }
+  } else if (raw === 'cai-dat' || raw === 'yeu-thich') { const v = raw === 'cai-dat' ? 'settings' : 'favs'; history.replaceState({ view: v }, '', '#' + raw); S.view = v; }
+  else if (h.has('viet')) {
+    history.replaceState({ view: 'drafts' }, '', '#viet'); S.view = 'drafts';
+    const did = h.get('viet'), chid = h.get('ch'), d = did && draft(did);
+    if (d) {
+      history.pushState({ view: 'draft', did }, '', `#viet=${encodeURIComponent(did)}`); Object.assign(S, { view: 'draft', did });
+      if (chid && d.chapters.some(c => c.id === chid)) { history.pushState({ view: 'chap', did, chid }, '', `#viet=${encodeURIComponent(did)}&ch=${encodeURIComponent(chid)}`); Object.assign(S, { view: 'chap', chid }); }
+    }
+  }
   render();
 })();
 
