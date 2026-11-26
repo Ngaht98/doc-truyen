@@ -84,6 +84,7 @@
   .chip small { font-size: 12px; opacity: .7; margin-left: 3px; font-variant-numeric: tabular-nums; }
   .chip.more { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); display: inline-flex; align-items: center; gap: 5px; }
   .chip.more svg { width: 15px; height: 15px; }
+  .chip.more.on { color: var(--on-accent); border-color: var(--accent); } /* đang lọc: chữ trắng trên nền màu nhấn (trước bị trùng màu nền) */
   .chip.more.on svg { stroke: var(--on-accent); }
   .filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13.5px; color: var(--muted); margin: -4px 2px 12px; }
   .filter-bar b { color: var(--text); }
@@ -369,7 +370,7 @@
 'use strict';
 /* Đọc truyện: web app chỉ đọc. Truyện nằm trong máy (IndexedDB), nhập từ file .wmkho xuất ở app TienIchWM (📱 Xuất kho).
    Nhập kho: so với tủ sách đang có, hiện truyện mới / có bản mới hơn / trùng y hệt để chọn rồi mới lưu (một giao dịch: lỗi giữa chừng thì không đổi gì), chỗ đang đọc vẫn giữ. */
-const APP_VERSION = '3.0 · 26/11/2026';
+const APP_VERSION = '3.0.1 · 26/11/2026';
 const FORMAT = 'TienIchWM-kho';
 const $app = document.getElementById('app'), $file = document.getElementById('file');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
