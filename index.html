@@ -147,6 +147,7 @@
   .tile .cover .bar { position: absolute; left: 6px; right: 6px; bottom: 6px; max-width: none; background: rgb(255 255 255 / .55); }
   .tile .t { font-size: 13.5px; font-weight: 600; line-height: 1.3; overflow-wrap: break-word; overflow-wrap: anywhere; }
   .tile .a { font-size: 12px; color: var(--muted); margin-top: -3px; overflow-wrap: break-word; overflow-wrap: anywhere; }
+  .tile .w { font-size: 11.5px; color: var(--muted); margin-top: -4px; font-variant-numeric: tabular-nums; }
   .tile:active { transform: scale(.97); }
   @media (min-width: 560px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
@@ -260,9 +261,9 @@
   .switch input:checked + i::after { transform: translateX(20px); }
   .preview { border-radius: 14px; border: 1px solid var(--line); background: var(--read-bg); color: var(--read-text); font-family: var(--rfont); font-size: var(--fs); line-height: var(--lh); text-align: var(--align); padding: 14px var(--pad); max-height: 190px; overflow: hidden; }
   .preview p { margin: 0 0 var(--ps); text-indent: var(--indent); }
-  .stat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); }
+  .stat { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); }
   .stat div { background: var(--card); padding: 12px 6px; text-align: center; }
-  .stat b { display: block; font-size: 19px; font-variant-numeric: tabular-nums; }
+  .stat b { display: block; font-size: 17px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
   .stat small { color: var(--muted); font-size: 12px; }
   .about { text-align: center; color: var(--muted); font-size: 13px; margin: 22px 0 6px; line-height: 1.6; }
 
@@ -661,7 +662,7 @@ function importSheet() {
     ${KINDS.map(([k, l, sub]) => {
       const list = p.rows.filter(r => r.kind === k);
       if (!list.length) return '';
-      const meta = r => `<small>${[r.s.author, num(r.chs.length) + ' chương', r.note].filter(Boolean).map(esc).join(' · ')}</small>`;
+      const meta = r => `<small>${[r.s.author, num(r.chs.length) + ' chương', num(wordsOf(r.chs)) + ' từ', r.note].filter(Boolean).map(esc).join(' · ')}</small>`;
       const head = `<div class="imp-h"><span><b>${l} (${num(list.length)})</b><small>${sub}</small></span>${list.length > 1 ? (k === 'new'
         ? `<button class="link" data-act="pick-all" data-k="${k}">${list.every(r => r.mode !== 'skip') ? 'Bỏ hết' : 'Chọn hết'}</button>`
         : `<span class="mini-seg"><span style="font-size:12px;color:var(--muted);align-self:center">Tất cả:</span>${MODES.map(([m, ml]) => `<button type="button" data-act="mode-all" data-k="${k}" data-m="${m}">${ml.replace(' bản cũ', '')}</button>`).join('')}</span>`) : ''}</div>`;
@@ -870,10 +871,10 @@ function listView(partial) {
   const rows = shown(base);
   if (prefs.sort === 'recent') rows.sort((a, b) => (S.pos.get(b.id)?.at || 0) - (S.pos.get(a.id)?.at || 0) || a.order - b.order);
   else if (prefs.sort === 'az') rows.sort((a, b) => a.title.localeCompare(b.title, 'vi'));
-  const words = s => s.chapters.reduce((a, c) => a + c.words, 0);
+  const words = s => wordsOf(s.chapters);
   const heart = s => S.favs.has(s.id) ? `<span class="heart" aria-label="Yêu thích">${icon('heart')}</span>` : '';
   const cards = prefs.layout === 'grid'
-    ? `<div class="grid">${rows.map(s => { const p = progress(s); return `<button class="tile" data-act="story" data-id="${esc(s.id)}">${coverHtml(s, (p ? `<span class="bar"><i style="width:${pct(p.ratio)}"></i></span>` : '') + heart(s))}<span class="t">${esc(s.title)}</span>${s.author ? `<span class="a">${esc(s.author)}</span>` : ''}</button>`; }).join('')}</div>`
+    ? `<div class="grid">${rows.map(s => { const p = progress(s); return `<button class="tile" data-act="story" data-id="${esc(s.id)}">${coverHtml(s, (p ? `<span class="bar"><i style="width:${pct(p.ratio)}"></i></span>` : '') + heart(s))}<span class="t">${esc(s.title)}</span>${s.author ? `<span class="a">${esc(s.author)}</span>` : ''}<span class="w">${num(s.chapters.length)} chương · ${num(words(s))} từ</span></button>`; }).join('')}</div>`
     : `<div class="list">${rows.map(s => {
         const p = progress(s), tg = s.categories;
         return `<button class="card" data-act="story" data-id="${esc(s.id)}">${coverHtml(s)}<div class="info"><div class="t">${esc(s.title)}</div>
@@ -897,7 +898,7 @@ function listView(partial) {
     scrollTo(0, Math.min(y, maxY()));
     return;
   }
-  $app.innerHTML = `<div class="wrap">${head(`${num(n)} truyện`)}${favMode ? '' : hintHtml()}
+  $app.innerHTML = `<div class="wrap">${head(`${num(n)} truyện · ${num(base.reduce((a, s) => a + words(s), 0))} từ`)}${favMode ? '' : hintHtml()}
     <div class="tools"><label class="search">${icon('search')}<input type="search" placeholder="Tìm tên truyện, tác giả, thể loại…" value="${esc(S.q)}" data-q aria-label="Tìm truyện" enterkeyhint="search"></label>
       <button class="ib" data-act="layout" aria-label="${prefs.layout === 'grid' ? 'Xem dạng danh sách' : 'Xem dạng lưới'}">${icon(prefs.layout === 'grid' ? 'rows' : 'grid')}</button></div>
     <div data-lv="${S.view}">${body}</div></div>`;
@@ -1264,7 +1265,7 @@ async function settingsView() {
 
     <div class="group-t">Dữ liệu trên máy</div>
     <div class="group">
-      <div class="stat"><div><b>${num(S.stories.length)}</b><small>truyện</small></div><div><b>${num(chapters)}</b><small>chương</small></div><div><b data-used>…</b><small>đang dùng</small></div></div>
+      <div class="stat"><div><b>${num(S.stories.length)}</b><small>truyện</small></div><div><b>${num(chapters)}</b><small>chương</small></div><div><b>${num(S.stories.reduce((a, s) => a + wordsOf(s.chapters), 0))}</b><small>từ</small></div><div><b data-used>…</b><small>đang dùng</small></div></div>
       ${m ? `<div class="item"><span class="lbl">Kho hiện tại<small>${esc(m.file)} · nhập lúc ${new Date(m.imported).toLocaleString('vi-VN')}</small></span></div>` : ''}
       <div class="item"><span class="lbl">Lưu trữ lâu dài<small data-persist>Đang kiểm tra…</small></span></div>
       <button class="item act" data-act="import"><span class="ico">${icon('import')}</span><span class="lbl">Nhập kho mới<small style="color:var(--muted);font-weight:400">Xem truyện mới / trùng rồi chọn, vẫn giữ chỗ đang đọc</small></span></button>
